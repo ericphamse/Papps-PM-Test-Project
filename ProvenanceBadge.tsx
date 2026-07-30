@@ -1,4 +1,4 @@
-// web/recruitment/src/features/editor/ProvenanceBadge.tsx
+web/recruitment/src/features/editor/ProvenanceBadge.tsx
 //
 // A small coloured label showing where a field's value came from.
 // Plain React + inline styles, so it does not depend on any Tailwind config.
