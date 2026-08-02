@@ -1,51 +1,109 @@
 // web/recruitment/src/features/analysis/types.ts
 //
-// TypeScript shapes for the analysis response the backend returns.
-// These MIRROR the backend DTOs in
-//   backend/CvPipeline.Api/Features/Analyses/CreateAnalysis/CreateAnalysisCommand.cs
-//
-// NOTE: this is the stage-1 EXTRACTION shape and it is incomplete. It will grow
-// to cover the full document in section 6 (seven sections; the eight
-// details-table rows). Keep it in sync with your partner's real response —
-// confirm the exact top-level field names, since the backend currently returns
-// `document` as opaque JSON.
+// The CvDocument contract, taken from the brief section 4.1 / 4.2.
+// THIS is the source of truth for the shape — not the backend's stage-1 DTOs,
+// which are an early sketch and are behind this. Your partner's C# records need
+// to converge on this too; raise it with him.
 
-// Where a field's value came from. Drives the ProvenanceBadge.
-export type Provenance = "generated" | "normalised" | "edited" | "absent";
+// ---------------------------------------------------------------------------
+// Provenance (4.1)
+// ---------------------------------------------------------------------------
 
-// Every field carries its value AND its provenance.
-export type ProvenanceValue<T> = {
+// All SIX classes. Every value in the document carries one.
+export type Provenance =
+  | "verbatim" // appears character-for-character in the CV
+  | "normalised" // house-style rewrite of a verified CV span
+  | "derived" // comes from the job requirements, not the CV
+  | "generated" // model-authored synthesis, grounded in verified CV spans
+  | "edited" // the user changed it after the model produced it
+  | "absent"; // not supported by the CV. Renders empty. NEVER invented.
+
+export interface FieldValue<T> {
   value: T | null;
   provenance: Provenance;
-  ruleId?: string; // e.g. "N1" when a normalisation rule produced the value
-};
+  sourceQuotes: string[]; // spans of the input supporting this value
+  ruleIds?: string[]; // for 'normalised': which 4.8.1 rules were applied (plural)
+  criteria?: string[]; // for 'generated' SCALARS only. List fields carry criteria per item.
+}
 
-export type PersonalDetails = {
-  fullName: ProvenanceValue<string>;
-  location: ProvenanceValue<string>;
-  securityClearance: ProvenanceValue<string>;
-  referees: ProvenanceValue<string>;
-};
+// ---------------------------------------------------------------------------
+// Item types (4.2)
+// ---------------------------------------------------------------------------
 
-export type WorkHistoryEntry = {
-  jobTitle: ProvenanceValue<string>;
-  company: ProvenanceValue<string>;
-  dates: ProvenanceValue<string>;
-  bulletPoints: string[]; // plain strings in the current DTO (no per-bullet provenance)
-};
+export interface Referee {
+  name: string;
+  position: string;
+  organisation: string;
+  phone: string;
+}
 
-export type EducationEntry = {
-  degree: ProvenanceValue<string>;
-  institution: ProvenanceValue<string>;
-};
+export interface CareerEntry {
+  title: string;
+  organisation: string;
+  startYear: string;
+  endYear: string; // may be 'Current'
+}
 
-// The tailored CV. (Composed from the DTOs above — confirm the nesting with your
-// partner; the lists are assumed because a CV has many jobs / degrees.)
-export type CvDocument = {
-  personalDetails: PersonalDetails;
-  workHistory: WorkHistoryEntry[];
-  education: EducationEntry[];
-};
+export interface DatedEntry {
+  description: string;
+  year: string; // may be 'Various'
+}
+
+export interface QualificationEntry {
+  qualification: string;
+  institution?: string;
+  year: string;
+}
+
+// criteria sit on the ITEM for these two, because the claim is about the
+// distribution across items, not about the field as a whole (4.1).
+export interface Competency {
+  text: string;
+  criteria: string[];
+}
+
+export interface Highlight {
+  heading: string;
+  bullet: string;
+  criteria: string[];
+}
+
+// ---------------------------------------------------------------------------
+// The document (4.2)
+// ---------------------------------------------------------------------------
+
+export interface CvDocument {
+  schemaVersion: 1; // bumped only when a change makes old documents unreadable
+
+  // Derived from the job requirements
+  roleTitle: FieldValue<string>; // header band + title line
+  level: FieldValue<string>; // title line
+  proposedRole: FieldValue<string>; // details table
+
+  // Extracted from the CV
+  fullName: FieldValue<string>;
+  qualifications: FieldValue<string[]>; // rendered semicolon-joined in the table
+  securityClearance: FieldValue<string>;
+  yearsOfExperience: FieldValue<string>;
+  availability: FieldValue<string>;
+  location: FieldValue<string>;
+  referees: FieldValue<Referee[]>;
+  careerSynopsis: FieldValue<CareerEntry[]>;
+
+  // Generated, tailored to the job requirements
+  professionalProfile: FieldValue<string>;
+  roleSuitability: FieldValue<string>;
+
+  // All mandatory — there is one template and it has all of these
+  coreCompetencies: FieldValue<Competency[]>;
+  commendationsAndAwards: FieldValue<DatedEntry[]>;
+  qualificationsDetailed: FieldValue<QualificationEntry[]>;
+  careerHighlights: FieldValue<Highlight[]>;
+}
+
+// ---------------------------------------------------------------------------
+// The API envelope (4.3)
+// ---------------------------------------------------------------------------
 
 export type AnalysisStatus =
   | "extracting"
@@ -54,11 +112,16 @@ export type AnalysisStatus =
   | "generated"
   | "failed";
 
-// The envelope around the document (matches the backend Analysis model:
-// Status + Document + Warnings + FailureDetail).
-export type Analysis = {
+export interface Warning {
+  code: string;
+  message: string;
+  field?: string;
+}
+
+export interface Analysis {
+  analysisId: string;
   status: AnalysisStatus;
   document: CvDocument | null;
-  warnings: string[];
+  warnings: Warning[];
   failureDetail?: unknown;
-};
+}
