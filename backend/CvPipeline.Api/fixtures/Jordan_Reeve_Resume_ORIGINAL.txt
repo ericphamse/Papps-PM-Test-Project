@@ -1,0 +1,85 @@
+Jordan Reeve
+
+jordan.reeve@example.com  |  0491 570 158  |  Adelaide SA 5000
+
+github.com/jreeve-example   linkedin.com/in/jordan-reeve-example
+
+About me
+
+Software engineer based in Adelaide. I've been doing this about 15 years now, started out doing PHP and jQuery at a small agency and these days I mostly work on cloud stuff - TypeScript/React on the front, Python or Go on the back, all containerised, running on AWS mostly but I've done a fair bit of Azure too. I like the messy problems: old systems that need to be pulled apart and put back together while they're still running. Last few years I've been leading small teams as well as writing code, and honestly I want to keep doing both, I don't want to end up in a role where I never open an editor.
+
+Currently contracting at Northline Digital. That contract is winding down and I'm looking at what's next. Would need roughly a month to wrap up properly. Happy to be in an office a couple of days a week, I'm in the CBD anyway.
+
+Tech I use
+
+TypeScript, JavaScript, React, Next.js, Node.js, Python (FastAPI, Django), Go, some Java from years ago, .NET/C# (inherited a big one, see below), PostgreSQL, DynamoDB, Redis, Kafka, Docker, Kubernetes, Terraform, GitHub Actions, Jenkins (unfortunately), AWS (ECS, EKS, Lambda, RDS, S3, SQS/SNS, API Gateway, CloudWatch), Azure (AKS, Functions, Cosmos), REST + GraphQL, event-driven patterns, Jest/Vitest/Playwright/pytest, Datadog, OpenTelemetry, Figma (enough to be dangerous). Also: PHP, jQuery, Backbone, AngularJS 1.x - all long dead but that's where I started.
+
+WORK
+
+Northline Digital — Principal Software Engineer (contract)
+Feb 2024 – present
+
+- Brought in to sort out the payments service. It was one big Rails-era monolith doing everything and deploys were a monthly all-hands event. Broke it into event-driven microservices on AWS, Kafka in the middle. p95 latency went from about 900ms to under 400ms (so ~60% off) and we can now deploy any day of the week with no downtime.
+- Set up the ingestion pipeline for the customer data platform. Kafka into Postgres, handles about 20 million events a day at peak, hasn't fallen over yet.
+- Doing a lot of design review across the other two squads even though it's not formally my job.
+- Rate is commercial-in-confidence, ask if you need it.
+
+Brightpath Software
+2018 – Feb 2024 (two roles)
+
+Engineering Lead, Mar 2021 – Feb 2024
+- Led a team of six. Hiring, onboarding, one-on-ones, the lot. Three of the juniors I brought in got to mid-level inside two years which I'm more proud of than any of the code.
+- Owned architecture + delivery for the main customer-facing platform, roughly 200k monthly active users.
+- Wrote the testing / code review / release standards that ended up getting picked up by the other two teams as well.
+- Replaced the manual release process (someone SSHing in on a Thursday night, genuinely) with GitHub Actions pipelines and Terraform. Went from monthly releases to daily.
+- Won the internal Engineering Excellence Award in 2023 for the release work.
+
+Senior Software Engineer, 2018 – 2021
+- Built the shared React + TypeScript component library. Five product teams ended up on it. We measured it once and new feature UI work was coming in about 40% faster.
+- Normal senior stuff: features, on-call rotation, mentoring, arguing about GraphQL.
+
+Cartwright Logistics Group — Software Engineer
+2015-2018
+- Inherited a .NET application that was about 15 years old at that point and running on a server under someone's desk. Not exaggerating.
+- Containerised it and moved it to cloud hosting. Zero customer downtime on cutover, which I still think was mostly luck, and hosting cost dropped about 35%.
+- Built internal tooling for the depot team, mostly C# and a bit of Angular.
+
+Redgum Interactive
+Jan 2009 – 2015
+Small digital agency, I was there six years and had three titles.
+- Full-Stack Developer (2012-2015) — client work, mostly PHP then increasingly Node. Ran a couple of projects end to end including client comms.
+- Junior Developer (2010-2012) — front end, WordPress themes, a lot of CSS.
+- Intern (Jan 09 - Oct 10, overlapped with uni) — started as an intern in the last year of my degree, they kept me on.
+- Employee of the Year 2014.
+
+The Crown & Anchor Hotel — Bar attendant
+2005 - 2008
+Put myself through the first part of uni. Probably not relevant but it's where the gap in the dates goes.
+
+Education / certs / that kind of thing
+
+- Master of Software Engineering, Southern Cross Institute — finished 2016, did it part time while working
+- Bachelor of Computer Science, Riverina Institute of Technology — 2006 to 2009, graduated 2009
+- AWS Certified Solutions Architect – Professional (2023)
+- CKA – Certified Kubernetes Administrator (2022, need to renew this)
+- Professional Scrum Master I — 2018
+- Adelaide High School, 2004. Probably don't need this on there.
+- Current National Police Check, did it last year for the Northline contract.
+
+Other bits
+
+- Won the Adelaide Dev Summit hackathon in 2019 with a team of three. Built a transit delay predictor over a weekend.
+- I run a small open source CLI tool for Terraform state diffing, ~400 stars, nothing serious.
+- Occasional speaker at the local JS meetup.
+
+Interests
+
+Bouldering, sourdough, restoring an old Datsun that will probably never run.
+
+References
+
+Marcus Delaney — my current manager at Northline Digital (Engineering Manager). 0491 570 156. Happy for you to call him, just give me a heads up first.
+
+Helena Voss — was CTO at Brightpath Software while I was there, she's moved on since but is fine to be contacted. 0491 570 157.
+
+Can dig up a third from Cartwright if needed but it's been a while.
