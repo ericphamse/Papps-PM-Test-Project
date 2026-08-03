@@ -15,6 +15,7 @@
 import { useState } from "react";
 import { FieldInput } from "./FieldInput";
 import { ProvenanceBadge } from "./ProvenanceBadge";
+import { PreviewRenderer } from "@/features/preview/PreviewRenderer";
 import type { CvDocument, FieldValue } from "@/features/analysis/types";
 
 // Scalar fields the user may edit as free text (5.4).
@@ -73,7 +74,10 @@ export function DocumentEditor({ document }: { document: CvDocument }) {
   }
 
   return (
-    <div style={{ display: "grid", gap: 32 }}>
+    // Editor on the left, live preview on the right. Both read the SAME `doc`
+    // state, so the preview always shows exactly what the user has edited.
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 1fr) auto", gap: 32, alignItems: "start" }}>
+      <div style={{ display: "grid", gap: 32 }}>
       {/* ---------- Scalar and prose fields ---------- */}
       <Section title="Details">
         {SCALAR_FIELDS.map(([key, label]) => (
@@ -82,6 +86,8 @@ export function DocumentEditor({ document }: { document: CvDocument }) {
             label={label}
             value={doc[key].value}
             provenance={doc[key].provenance}
+            sourceQuotes={doc[key].sourceQuotes}
+            ruleIds={doc[key].ruleIds}
             onChange={(v) => updateScalar(key, v)}
           />
         ))}
@@ -165,6 +171,14 @@ export function DocumentEditor({ document }: { document: CvDocument }) {
           </Row>
         ))}
       </Section>
+      </div>
+
+      {/* The preview column. Scales down so an A4 page fits on screen. */}
+      <div style={{ position: "sticky", top: 16 }}>
+        <div style={{ transform: "scale(0.6)", transformOrigin: "top left" }}>
+          <PreviewRenderer document={doc} />
+        </div>
+      </div>
     </div>
   );
 }
