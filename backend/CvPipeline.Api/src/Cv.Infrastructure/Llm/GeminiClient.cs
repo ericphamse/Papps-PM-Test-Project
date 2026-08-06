@@ -82,6 +82,13 @@ public class GeminiClient : IGeminiClient
             { "Title": {"SourceQuotes":["..."]}, "Organisation": {"SourceQuotes":["..."]},
               "StartYear": {"SourceQuotes":["..."]}, "EndYear": {"SourceQuotes":["..."]} }
           ],
+            "CommendationsAndAwards": [
+            { "Description": {"SourceQuotes":["..."]}, "Year": {"SourceQuotes":["..."]} }
+          ],
+          "QualificationsDetailed": [
+            { "Qualification": {"SourceQuotes":["..."]}, "Institution": {"SourceQuotes":["..."]},
+              "Year": {"SourceQuotes":["..."]} }
+          ],
           "TechVotes": [
             { "Technology": "...", "Keep": true, "RfqQuote": "..." }
           ]

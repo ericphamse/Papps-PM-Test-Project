@@ -23,6 +23,9 @@ public record TechVote(
     string? RfqQuote       // required when Keep = true
 );
 
+public record DatedEntryQuotes(FieldQuotes Description, FieldQuotes Year);
+public record QualificationEntryQuotes(FieldQuotes Qualification, FieldQuotes Institution, FieldQuotes Year);
+
 // The full stage 1 response
 public record SelectionResult(
     FieldQuotes FullName,
@@ -33,5 +36,7 @@ public record SelectionResult(
     FieldQuotes Location,
     List<ReferQuotes> Referees,
     List<CareerEntryQuotes> CareerSynopsis,
+    List<DatedEntryQuotes> CommendationsAndAwards,          // ← NEW
+    List<QualificationEntryQuotes> QualificationsDetailed,
     List<TechVote> TechVotes
 );

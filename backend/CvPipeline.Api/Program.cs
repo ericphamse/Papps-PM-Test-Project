@@ -19,6 +19,7 @@ builder.Services.AddScoped<ICvTextExtractor, StubCvTextExtractor>();   // swap t
 builder.Services.AddScoped<CvDocumentValidator>();
 builder.Services.AddScoped<ExtractCvHandler>();
 builder.Services.AddScoped<CreateAnalysisHandler>();
+builder.Services.AddScoped<NormaliseSelectionHandler>();
 
 var app = builder.Build();   // declared BEFORE any app.Use... / app.Map... calls
 

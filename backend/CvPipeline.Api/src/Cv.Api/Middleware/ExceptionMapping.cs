@@ -24,5 +24,14 @@ public class ExceptionMappingMiddleware
                 detail = ex.Errors.Select(e => new { field = e.FieldPath, message = e.Message })
             });
         }
+        catch (Google.GenAI.ServerError ex)   // NEW
+        {
+            context.Response.StatusCode = 503;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = "gemini_unavailable",
+                detail = "The AI service is temporarily overloaded. Your CV and job requirements have already been saved — please try again in a minute."
+            });
+        }
     }
 }

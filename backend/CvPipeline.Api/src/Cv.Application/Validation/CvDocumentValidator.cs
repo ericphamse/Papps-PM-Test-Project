@@ -37,6 +37,21 @@ public class CvDocumentValidator
             CheckQuotes(c.EndYear, cvText, $"CareerSynopsis[{i}].EndYear", errors);
         }
 
+        for (int i = 0; i < result.CommendationsAndAwards.Count; i++)
+        {
+            var c = result.CommendationsAndAwards[i];
+            CheckQuotes(c.Description, cvText, $"CommendationsAndAwards[{i}].Description", errors);
+            CheckQuotes(c.Year, cvText, $"CommendationsAndAwards[{i}].Year", errors);
+        }
+
+        for (int i = 0; i < result.QualificationsDetailed.Count; i++)
+        {
+            var q = result.QualificationsDetailed[i];
+            CheckQuotes(q.Qualification, cvText, $"QualificationsDetailed[{i}].Qualification", errors);
+            CheckQuotes(q.Institution, cvText, $"QualificationsDetailed[{i}].Institution", errors);
+            CheckQuotes(q.Year, cvText, $"QualificationsDetailed[{i}].Year", errors);
+        }
+
         for (int i = 0; i < result.TechVotes.Count; i++)
         {
             var vote = result.TechVotes[i];
