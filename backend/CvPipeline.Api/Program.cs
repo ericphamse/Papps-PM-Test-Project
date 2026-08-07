@@ -6,6 +6,7 @@ using CvPipeline.Api.Cv.Infrastructure.Llm;
 using CvPipeline.Api.Cv.Infrastructure.Documents;
 using CvPipeline.Api.Cv.Application.Validation;
 using CvPipeline.Api.Cv.Api.Middleware;
+using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<CvDocumentValidator>();
 builder.Services.AddScoped<ExtractCvHandler>();
 builder.Services.AddScoped<CreateAnalysisHandler>();
 builder.Services.AddScoped<NormaliseSelectionHandler>();
+builder.Services.AddScoped<TailorNarrativeHandler>();
 
 var app = builder.Build();   // declared BEFORE any app.Use... / app.Map... calls
 

@@ -8,7 +8,7 @@ About me
 
 Software engineer based in Adelaide. I've been doing this about 15 years now, started out doing PHP and jQuery at a small agency and these days I mostly work on cloud stuff - TypeScript/React on the front, Python or Go on the back, all containerised, running on AWS mostly but I've done a fair bit of Azure too. I like the messy problems: old systems that need to be pulled apart and put back together while they're still running. Last few years I've been leading small teams as well as writing code, and honestly I want to keep doing both, I don't want to end up in a role where I never open an editor.
 
-Currently contracting at Northline Digital. That contract is winding down and I'm looking at what's next. Would need roughly a month to wrap up properly. Happy to be in an office a couple of days a week, I'm in the CBD anyway.
+Currently contracting at Northline Digital. That contract is winding down and I'm looking at what's next. Would need roughly 2 months to wrap up properly. Happy to be in an office a couple of days a week, I'm in the CBD anyway.
 
 Tech I use
 

@@ -7,7 +7,9 @@ namespace CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 
 public class NormaliseSelectionHandler
 {
-    public CvDocument Normalise(SelectionResult selection, ParsedJobRequirements parsedJd, string cvText, string jobRequirements)
+    public record NormalisedResult(CvDocument Document, List<string> KeptTechnologies);
+
+    public NormalisedResult Normalise(SelectionResult selection, ParsedJobRequirements parsedJd, string cvText, string jobRequirements)
     {
         var fullName = NormaliseVerbatim(selection.FullName);
 
@@ -29,7 +31,7 @@ public class NormaliseSelectionHandler
         var absentList = new FieldValue<List<Competency>>(null, Provenance.Absent, Array.Empty<string>());
         var absentHighlights = new FieldValue<List<Highlight>>(null, Provenance.Absent, Array.Empty<string>());
 
-        return new CvDocument(
+        var cvDocument = new CvDocument(
             SchemaVersion: 1,
             RoleTitle: parsedJd.RoleTitle,
             Level: parsedJd.Level,
@@ -49,6 +51,7 @@ public class NormaliseSelectionHandler
             QualificationsDetailed: qualificationsDetailed,
             CareerHighlights: absentHighlights    // stage 3 — not built yet
         );
+        return new NormalisedResult(cvDocument, keptTechnologies);
     }
 
     private FieldValue<string> NormaliseVerbatim(FieldQuotes quotes)

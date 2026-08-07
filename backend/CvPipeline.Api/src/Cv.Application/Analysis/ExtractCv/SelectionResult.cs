@@ -18,15 +18,15 @@ public record CareerEntryQuotes(
 );
 
 public record TechVote(
-    string Technology,     // found in the CV
+    string Technology,
     bool Keep,
-    string? RfqQuote       // required when Keep = true
+    string? RfqQuote
 );
 
 public record DatedEntryQuotes(FieldQuotes Description, FieldQuotes Year);
 public record QualificationEntryQuotes(FieldQuotes Qualification, FieldQuotes Institution, FieldQuotes Year);
 
-// The full stage 1 response
+//stage 1 response
 public record SelectionResult(
     FieldQuotes FullName,
     FieldQuotes Qualifications,
@@ -36,7 +36,7 @@ public record SelectionResult(
     FieldQuotes Location,
     List<ReferQuotes> Referees,
     List<CareerEntryQuotes> CareerSynopsis,
-    List<DatedEntryQuotes> CommendationsAndAwards,          // ← NEW
+    List<DatedEntryQuotes> CommendationsAndAwards,
     List<QualificationEntryQuotes> QualificationsDetailed,
     List<TechVote> TechVotes
 );

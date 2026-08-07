@@ -3,6 +3,8 @@ using CvPipeline.Api.Models;
 using CvPipeline.Api.Cv.Domain;
 using CvPipeline.Api.Cv.Infrastructure.Documents;
 using CvPipeline.Api.Cv.Application.Analysis.ParseJobRequirements;
+using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
+using System.Text.Json;
 
 namespace CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 
@@ -11,14 +13,16 @@ public class CreateAnalysisHandler
     private readonly CvPipelineDbContext _db;
     private readonly ICvTextExtractor _extractor;
     private readonly ExtractCvHandler _extractCv;
-    private readonly NormaliseSelectionHandler _normaliser; 
+    private readonly NormaliseSelectionHandler _normaliser;
+    private readonly TailorNarrativeHandler _tailor;
 
-    public CreateAnalysisHandler(CvPipelineDbContext db, ICvTextExtractor extractor, ExtractCvHandler extractCv, NormaliseSelectionHandler normaliser)
+    public CreateAnalysisHandler(CvPipelineDbContext db, ICvTextExtractor extractor, ExtractCvHandler extractCv, NormaliseSelectionHandler normaliser, TailorNarrativeHandler tailor)
     {
         _db = db;
         _extractor = extractor;
         _extractCv = extractCv;
         _normaliser = normaliser;
+        _tailor = tailor;
     }
 
     public async Task<CreateAnalysisResult> HandleAsync(
@@ -26,10 +30,10 @@ public class CreateAnalysisHandler
         string jobRequirementsText,
         CancellationToken ct)
     {
-        //Extract CV text
+        //Extract cv text
         string cvText = await _extractor.ExtractTextAsync(cvFile, ct);
 
-        //PERSIST FIRST
+        //Save to DB
         var analysis = new CvPipeline.Api.Models.Analysis
         {   
             Id = Guid.NewGuid(),
@@ -42,15 +46,27 @@ public class CreateAnalysisHandler
         _db.Analyses.Add(analysis);
         await _db.SaveChangesAsync(ct);
 
-        //Parse JD
+        //Parse jd
         var parsedJd = JobRequirementsParser.Parse(jobRequirementsText);
-        //Stage1
+        //stage1
         var selection = await _extractCv.RunAsync(cvText, jobRequirementsText, ct);
-        //Stage2
-        var CvDocument = _normaliser.Normalise(selection, parsedJd, cvText, jobRequirementsText);
+        //stage2
+        var normalisedResult = _normaliser.Normalise(selection, parsedJd, cvText, jobRequirementsText);
+        var partialDocument = normalisedResult.Document;
+        var keptTechnologies = normalisedResult.KeptTechnologies;
 
-        return new CreateAnalysisResult(analysis.Id, parsedJd, selection, CvDocument);
+        //stage3
+        analysis.Status = AnalysisStatus.Tailoring;
+        await _db.SaveChangesAsync(ct);
+        var tailoredDocument = await _tailor.RunAsync(partialDocument, jobRequirementsText, keptTechnologies, cvText, ct);
+
+        //persist final document
+        analysis.Status = "review";
+        analysis.Document = JsonDocument.Parse(
+            System.Text.Json.JsonSerializer.Serialize(tailoredDocument));   // ← was finalDocument
+        await _db.SaveChangesAsync(ct);
+        return new CreateAnalysisResult(analysis.Id, parsedJd, selection, partialDocument, tailoredDocument);
     }
 }
 
-public record CreateAnalysisResult(Guid AnalysisId, ParsedJobRequirements ParsedJd, SelectionResult Selection, CvDocument CvDocument);
+public record CreateAnalysisResult(Guid AnalysisId, ParsedJobRequirements ParsedJd, SelectionResult Selection, CvDocument partialDocument, CvDocument tailoredDocument);

@@ -37,7 +37,7 @@ public static class RelevanceFilter
     // O5 / O8: commercial terms and offer/condition asides that can ride along inside
     // an otherwise legitimate span (e.g. availability text). Known-phrase coverage,
     // same shape and same caveat as O7 in Rules.cs — extend as real examples turn up,
-    // don't chase hypothetical phrasing.
+    // don           't chase hypothetical phrasing.
     private static readonly string[] CommercialAndOfferPhrases =
     {
         "commercial-in-confidence", "commercial in confidence",

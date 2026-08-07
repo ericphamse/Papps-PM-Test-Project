@@ -1,5 +1,6 @@
 // src/Cv.Api/Middleware/ExceptionMapping.cs
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
+using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
 
 namespace CvPipeline.Api.Cv.Api.Middleware;
 
@@ -24,13 +25,23 @@ public class ExceptionMappingMiddleware
                 detail = ex.Errors.Select(e => new { field = e.FieldPath, message = e.Message })
             });
         }
-        catch (Google.GenAI.ServerError ex)   // NEW
+        catch (Google.GenAI.ServerError)   // NEW
         {
             context.Response.StatusCode = 503;
             await context.Response.WriteAsJsonAsync(new
             {
                 error = "gemini_unavailable",
                 detail = "The AI service is temporarily overloaded. Your CV and job requirements have already been saved — please try again in a minute."
+            });
+        }
+        catch (TailoringValidationException ex)
+        {
+            context.Response.StatusCode = 422;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = "tailoring_validation_failed",
+                detail = ex.Errors
             });
         }
     }
