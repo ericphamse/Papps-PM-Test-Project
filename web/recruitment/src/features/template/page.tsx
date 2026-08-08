@@ -19,7 +19,7 @@ export default async function Home() {
 
       {/* `analysis.document` is plain JSON, so it crosses the server -> client
           boundary fine. Functions and class instances would not. */}
-      {analysis.document && <DocumentEditor document={analysis.document} />}
+      {analysis.document && <DocumentEditor document={analysis.document} analysisId={analysis.analysisId} />}
     </main>
   );
 }

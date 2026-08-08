@@ -16,6 +16,8 @@ import { useState } from "react";
 import { FieldInput } from "./FieldInput";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { PreviewRenderer } from "@/features/preview/PreviewRenderer";
+import { DownloadButton } from "@/features/docx/DownloadButton";
+import { HistoryPanel } from "@/features/history/HistoryPanel";
 import type { CvDocument, FieldValue } from "@/features/analysis/types";
 
 // Scalar fields the user may edit as free text (5.4).
@@ -34,7 +36,7 @@ const SCALAR_FIELDS = [
 
 type ScalarKey = (typeof SCALAR_FIELDS)[number][0];
 
-export function DocumentEditor({ document }: { document: CvDocument }) {
+export function DocumentEditor({ document, analysisId }: { document: CvDocument; analysisId: string }) {
   const [doc, setDoc] = useState<CvDocument>(document);
 
   // Replace a field's value and mark it edited (P6). sourceQuotes are KEPT —
@@ -173,8 +175,10 @@ export function DocumentEditor({ document }: { document: CvDocument }) {
       </Section>
       </div>
 
-      {/* The preview column. Scales down so an A4 page fits on screen. */}
-      <div style={{ position: "sticky", top: 16 }}>
+      {/* Right column: download, history, then the live preview. */}
+      <div style={{ position: "sticky", top: 16, display: "grid", gap: 16 }}>
+        <DownloadButton analysisId={analysisId} document={doc} />
+        <HistoryPanel onLoad={(loaded) => setDoc(loaded)} />
         <div style={{ transform: "scale(0.6)", transformOrigin: "top left" }}>
           <PreviewRenderer document={doc} />
         </div>
