@@ -5,7 +5,7 @@
 // Reads every colour and measurement from tokens.ts (6.0).
 // Section order is fixed by 6.4 and mirrors the preview exactly.
 
-import { Document, Paragraph, TextRun, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } from "docx";
+import { Document, Paragraph, TextRun, AlignmentType, BorderStyle, Table, TabStopType } from "docx";
 import { tokens, ptToHalfPt } from "@/features/template/tokens";
 import { buildDetailsTable } from "./shared/detailsTable";
 import { buildHeader, buildFooter } from "./shared/headerFooter";
@@ -68,37 +68,31 @@ function bullet(text: string): Paragraph {
   });
 }
 
-// Two-column "text ..... year" row rendered as a borderless table row
-function datedRow(left: string, right: string): TableRow {
-  const cell = (text: string, alignRight = false) =>
-    new TableCell({
-      borders: {
-        top: { style: BorderStyle.NONE, size: 0, color: "auto" },
-        bottom: { style: BorderStyle.NONE, size: 0, color: "auto" },
-        left: { style: BorderStyle.NONE, size: 0, color: "auto" },
-        right: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      },
-      children: [
-        new Paragraph({
-          alignment: alignRight ? AlignmentType.RIGHT : AlignmentType.LEFT,
-          children: [
-            new TextRun({
-              text,
-              font: tokens.bodyFont,
-              size: ptToHalfPt(tokens.bodyPt),
-              color: noHash(tokens.ink),
-            }),
-          ],
-        }),
-      ],
-    });
-  return new TableRow({ children: [cell(left), cell(right, true)] });
-}
+// "text .......... year" line: ONE paragraph with a right-aligned tab stop at
+// the content edge. This is how the template does it — NOT a table. 6.3 allows
+// exactly ONE table in the document (the details table); rendering these
+// sections as tables fails the conformance table-count check. Found the hard
+// way on the first generated file.
+const CONTENT_WIDTH_DXA = tokens.table.labelCol + tokens.table.valueCol; // 9360
 
-function datedTable(rows: [string, string][]): Table {
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: rows.map(([l, r]) => datedRow(l, r)),
+function datedLine(left: string, right: string): Paragraph {
+  return new Paragraph({
+    tabStops: [{ type: TabStopType.RIGHT, position: CONTENT_WIDTH_DXA }],
+    spacing: { after: 40 },
+    children: [
+      new TextRun({
+        text: left,
+        font: tokens.bodyFont,
+        size: ptToHalfPt(tokens.bodyPt),
+        color: noHash(tokens.ink),
+      }),
+      new TextRun({
+        text: "\t" + right, // the tab jumps to the right-aligned stop
+        font: tokens.bodyFont,
+        size: ptToHalfPt(tokens.bodyPt),
+        color: noHash(tokens.ink),
+      }),
+    ],
   });
 }
 
@@ -132,14 +126,8 @@ export function buildCvDocument(doc: CvDocument): Document {
   children.push(body(doc.professionalProfile.value ?? ""));
 
   children.push(heading("Career Synopsis"));
-  children.push(
-    datedTable(
-      (doc.careerSynopsis.value ?? []).map((e: CareerEntry) => [
-        `${e.title}, ${e.organisation}`,
-        `${e.startYear} \u2013 ${e.endYear}`, // en dash everywhere (wart 4 normalised)
-      ]),
-    ),
-  );
+  for (const e of doc.careerSynopsis.value ?? [])
+    children.push(datedLine(`${e.title}, ${e.organisation}`, `${e.startYear} \u2013 ${e.endYear}`)); // en dash (wart 4 normalised)
 
   children.push(heading("Role Suitability"));
   children.push(body(doc.roleSuitability.value ?? ""));
@@ -148,19 +136,12 @@ export function buildCvDocument(doc: CvDocument): Document {
   for (const c of doc.coreCompetencies.value ?? []) children.push(bullet((c as Competency).text));
 
   children.push(heading("Commendations and Awards"));
-  children.push(
-    datedTable((doc.commendationsAndAwards.value ?? []).map((a: DatedEntry) => [a.description, a.year])),
-  );
+  for (const a of doc.commendationsAndAwards.value ?? [])
+    children.push(datedLine(a.description, a.year));
 
   children.push(heading("Qualifications"));
-  children.push(
-    datedTable(
-      (doc.qualificationsDetailed.value ?? []).map((q: QualificationEntry) => [
-        q.institution ? `${q.qualification}, ${q.institution}` : q.qualification,
-        q.year,
-      ]),
-    ),
-  );
+  for (const q of doc.qualificationsDetailed.value ?? [])
+    children.push(datedLine(q.institution ? `${q.qualification}, ${q.institution}` : q.qualification, q.year));
 
   children.push(heading("Career Highlights"));
   for (const h of doc.careerHighlights.value ?? []) {
