@@ -130,9 +130,6 @@ public class GeminiClient : IGeminiClient
         return trimmed;
     }
 
-
-
-    // Add this method to your existing GeminiClient class
     public async Task<TailoredFields> TailorAsync(
         CvDocument partial,
         string jobRequirements,
@@ -150,7 +147,7 @@ public class GeminiClient : IGeminiClient
             {
                 SystemInstruction = new Content { Parts = new List<Part> { new Part { Text = systemInstruction } } },
                 ResponseMimeType = "application/json",
-                Temperature = 0.4f   // slightly higher than stage 1 — some creativity needed for generation
+                Temperature = 0.4f
             }
         );
 

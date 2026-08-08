@@ -63,10 +63,10 @@ public class CreateAnalysisHandler
         //persist final document
         analysis.Status = "review";
         analysis.Document = JsonDocument.Parse(
-            System.Text.Json.JsonSerializer.Serialize(tailoredDocument));   // ← was finalDocument
+            System.Text.Json.JsonSerializer.Serialize(tailoredDocument));
         await _db.SaveChangesAsync(ct);
-        return new CreateAnalysisResult(analysis.Id, parsedJd, selection, partialDocument, tailoredDocument);
+        return new CreateAnalysisResult(analysis.Id, parsedJd, tailoredDocument);
     }
 }
 
-public record CreateAnalysisResult(Guid AnalysisId, ParsedJobRequirements ParsedJd, SelectionResult Selection, CvDocument partialDocument, CvDocument tailoredDocument);
+public record CreateAnalysisResult(Guid AnalysisId, ParsedJobRequirements ParsedJd, CvDocument tailoredDocument);

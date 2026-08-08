@@ -1,10 +1,12 @@
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 
 namespace CvPipeline.Api.Cv.Api.Controllers;
 
 [ApiController]
 [Route("api/analyses")]
+[EnableCors] 
 public class AnalysisController : ControllerBase
 {
     private readonly CreateAnalysisHandler _handler;

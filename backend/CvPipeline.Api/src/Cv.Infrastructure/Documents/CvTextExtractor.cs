@@ -11,6 +11,6 @@ public class StubCvTextExtractor : ICvTextExtractor
     public Task<string> ExtractTextAsync(IFormFile file, CancellationToken ct)
     {
         using var reader = new StreamReader(file.OpenReadStream());
-        return reader.ReadToEndAsync(); // works for .txt fixtures during dev; NOT real .docx parsing yet
+        return reader.ReadToEndAsync();
     }
 }
