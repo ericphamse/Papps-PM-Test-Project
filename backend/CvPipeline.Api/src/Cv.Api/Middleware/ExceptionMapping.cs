@@ -1,6 +1,7 @@
 // src/Cv.Api/Middleware/ExceptionMapping.cs
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
+using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;
 
 namespace CvPipeline.Api.Cv.Api.Middleware;
 
@@ -35,6 +36,17 @@ public class ExceptionMappingMiddleware
             {
                 error = "tailoring_validation_failed",
                 detail = ex.Errors
+            });
+        }
+        catch (Gate2Exception ex)
+        {
+            context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
+            context.Response.StatusCode = 422;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = "gate2_validation_failed",
+                violations = ex.Violations.Select(v => new { rule = v.Rule, message = v.Message })
             });
         }
         catch (Google.GenAI.ServerError)
@@ -72,5 +84,6 @@ public class ExceptionMappingMiddleware
                 innerInner = ex.InnerException?.InnerException?.Message   // ← and this
             });
         }
+        
     }
 }

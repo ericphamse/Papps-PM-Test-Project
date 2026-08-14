@@ -14,6 +14,7 @@ public class NormaliseSelectionHandler
         var fullName = NormaliseVerbatim(selection.FullName);
 
         var securityClearance = NormaliseScalar(selection.SecurityClearance, cvText, NormalisationRules.TryN3_BackgroundCheck);
+        Console.WriteLine($"SecurityClearance: value={securityClearance.Value}, provenance={securityClearance.Provenance}");
         var availability = NormaliseScalar(selection.Availability, cvText, NormalisationRules.TryN2_Availability);
         var location = NormaliseScalar(selection.Location, cvText, NormalisationRules.TryN1_Location);
         var careerSynopsis = NormaliseCareerSynopsis(selection.CareerSynopsis, selection.Qualifications);
@@ -201,6 +202,10 @@ public class NormaliseSelectionHandler
                 e.Description.SourceQuotes[0],
                 e.Year.SourceQuotes.FirstOrDefault() ?? "Various"))
             .ToList();
-        return new FieldValue<List<DatedEntry>>(results, Provenance.Normalised, Array.Empty<string>());
+
+        return new FieldValue<List<DatedEntry>>(
+            results,
+            results.Count > 0 ? Provenance.Verbatim : Provenance.Absent,  // ← Verbatim, not Normalised
+            Array.Empty<string>());
     }
 }

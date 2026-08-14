@@ -129,6 +129,7 @@ export default function Home() {
             {result.tailoredDocument && (
               <EditableDocumentView
                 doc={result.tailoredDocument}
+                analysisId={result.analysisId}
                 onDocumentChange={(updated) => setResult((prev: any) => ({ ...prev, tailoredDocument: updated }))}
               />
             )}
@@ -311,14 +312,83 @@ function CvDocumentView({ doc }: { doc: any }) {
   );
 }
 
-function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
+const PROVENANCE_LABELS: Record<number, string> = {
+  0: "verbatim",
+  1: "normalised",
+  2: "derived",
+  3: "generated",
+  4: "edited",
+  5: "absent"
+};
+
+const PROVENANCE_COLORS: Record<string, string> = {
+  verbatim: "#059669",    // green
+  normalised: "#2563eb",  // blue
+  derived: "#7c3aed",     // purple
+  generated: "#d97706",   // amber
+  edited: "#dc2626",      // red
+  absent: "#9ca3af"       // gray
+};
+
+function ProvenanceBadge({ provenance }: { provenance: number | string }) {
+  const label = typeof provenance === "number" 
+    ? PROVENANCE_LABELS[provenance] ?? "unknown"
+    : provenance;
+  const color = PROVENANCE_COLORS[label] ?? "#9ca3af";
+  
+  return (
+    <span style={{
+      fontSize: 10,
+      fontWeight: 600,
+      color: "white",
+      background: color,
+      padding: "2px 8px",
+      borderRadius: 10,
+      marginLeft: 8,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      verticalAlign: "middle"
+    }}>
+      {label}
+    </span>
+  );
+}
+
+function EditableDocumentView({ doc: initialDoc, onDocumentChange, analysisId }: {
   doc: any;
   onDocumentChange: (updated: any) => void;
+  analysisId: string;
 }) {
   const [doc, setDoc] = useState<any>(initialDoc);
+  const originalDoc = useState<any>(initialDoc)[0];
+  const [editedFields, setEditedFields] = useState<Set<string>>(new Set());
 
   const update = (field: string, value: any) => {
-    const updated = { ...doc, [field]: { ...doc[field], value } };
+    const originalValue = originalDoc[field]?.value;
+    const originalProvenance = originalDoc[field]?.provenance;
+    const newProvenance = value === originalValue ? originalProvenance : 4;
+
+    const updated = {
+      ...doc,
+      [field]: { ...doc[field], value, provenance: newProvenance }
+    };
+    setDoc(updated);
+    setEditedFields(prev => new Set(prev).add(field));
+    onDocumentChange(updated);
+  };
+
+  const updateListItem = (field: string, items: any[]) => {
+    const originalItems = originalDoc[field]?.value;
+    const originalProvenance = originalDoc[field]?.provenance;
+
+    // Compare serialized versions to check if restored to original
+    const isRestored = JSON.stringify(items) === JSON.stringify(originalItems);
+    const newProvenance = isRestored ? originalProvenance : 4;
+
+    const updated = {
+      ...doc,
+      [field]: { ...doc[field], value: items, provenance: newProvenance }
+    };
     setDoc(updated);
     onDocumentChange(updated);
   };
@@ -326,14 +396,72 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
   const competencies = doc.coreCompetencies?.value ?? [];
   const highlights = doc.careerHighlights?.value ?? [];
 
+  const [downloading, setDownloading] = useState(false);
+  const [gate2Errors, setGate2Errors] = useState<any[] | null>(null);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    setGate2Errors(null);
+
+    try {
+      const response = await fetch("http://localhost:5068/api/generations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysisId, document: doc })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setGate2Errors(data.violations ?? [{ rule: "error", message: data.detail ?? "Unknown error" }]);
+        return;
+      }
+
+      alert(`Saved! Generation ID: ${data.generationId}\nFilename: ${data.outputFilename}`);
+    } catch {
+      setGate2Errors([{ rule: "network", message: "Failed to connect to backend." }]);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div style={{ marginTop: 32, background: "white", borderRadius: 8, boxShadow: "0 2px 16px rgba(0,0,0,0.08)", padding: 32, color: "#111" }}>
       <h2 style={{ fontSize: 16, fontWeight: 700, color: "#1B2A4A", marginBottom: 24 }}>Edit Document</h2>
+
+      {/* Details — editable */}
+      <div style={{ marginBottom: 24 }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 12 }}>Details</h3>
+        {[
+          ["Full Name", "fullName"],
+          ["Proposed Role", "proposedRole"],
+          ["Security Clearance", "securityClearance"],
+          ["Years of Experience", "yearsOfExperience"],
+          ["Availability", "availability"],
+          ["Location", "location"],
+          ["Role Title", "roleTitle"],
+          ["Level", "level"],
+        ].map(([label, field]) => (
+          <div key={field} style={{ marginBottom: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+              {label}
+              <ProvenanceBadge provenance={doc[field]?.provenance ?? 5} />
+            </label>
+            <input
+              type="text"
+              value={doc[field]?.value ?? ""}
+              onChange={(e) => update(field, e.target.value)}
+              style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 13, boxSizing: "border-box" }}
+            />
+          </div>
+        ))}
+      </div>
 
       {/* Professional Profile */}
       <div style={{ marginBottom: 20 }}>
         <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: "#374151", marginBottom: 6 }}>
           Professional Profile
+          <ProvenanceBadge provenance={doc.professionalProfile?.provenance ?? 5} />
         </label>
         <textarea
           value={doc.professionalProfile?.value ?? ""}
@@ -346,7 +474,9 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
       {/* Role Suitability */}
       <div style={{ marginBottom: 20 }}>
         <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: "#374151", marginBottom: 6 }}>
-          Role Suitability <span style={{ fontWeight: 400, color: "#6b7280" }}>(max 200 words)</span>
+          Role Suitability
+          <ProvenanceBadge provenance={doc.roleSuitability?.provenance ?? 5} />
+          <span style={{ fontWeight: 400, color: "#6b7280", fontSize: 12, marginLeft: 8 }}>(max 200 words)</span>
         </label>
         <textarea
           value={doc.roleSuitability?.value ?? ""}
@@ -359,23 +489,12 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
         </p>
       </div>
 
-      {/* Years of Experience */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: "#374151", marginBottom: 6 }}>
-          Years of Experience
-        </label>
-        <input
-          type="text"
-          value={doc.yearsOfExperience?.value ?? ""}
-          onChange={(e) => update("yearsOfExperience", e.target.value)}
-          style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "8px 12px", fontSize: 13, boxSizing: "border-box" }}
-        />
-      </div>
-
       {/* Core Competencies */}
       <div style={{ marginBottom: 20 }}>
         <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: "#374151", marginBottom: 6 }}>
-          Core Competencies <span style={{ fontWeight: 400, color: "#6b7280" }}>(exactly 10)</span>
+          Core Competencies
+          <ProvenanceBadge provenance={doc.coreCompetencies?.provenance ?? 5} />
+          <span style={{ fontWeight: 400, color: "#6b7280", fontSize: 12, marginLeft: 8 }}>(exactly 10)</span>
         </label>
         {competencies.map((c: any, i: number) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -386,7 +505,7 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
               onChange={(e) => {
                 const updated = [...competencies];
                 updated[i] = { ...updated[i], text: e.target.value };
-                update("coreCompetencies", updated);
+                updateListItem("coreCompetencies", updated);
               }}
               style={{ flex: 1, border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}
             />
@@ -397,27 +516,31 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
       {/* Career Highlights */}
       <div style={{ marginBottom: 20 }}>
         <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: "#374151", marginBottom: 6 }}>
-          Career Highlights <span style={{ fontWeight: 400, color: "#6b7280" }}>(exactly 6)</span>
+          Career Highlights
+          <ProvenanceBadge provenance={doc.careerHighlights?.provenance ?? 5} />
+          <span style={{ fontWeight: 400, color: "#6b7280", fontSize: 12, marginLeft: 8 }}>(exactly 6)</span>
         </label>
         {highlights.map((h: any, i: number) => (
           <div key={i} style={{ marginBottom: 16, padding: 12, background: "#f9fafb", borderRadius: 6, border: "1px solid #e5e7eb" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Heading</span>
+            </div>
             <input
               type="text"
               value={h.heading}
               onChange={(e) => {
                 const updated = [...highlights];
                 updated[i] = { ...updated[i], heading: e.target.value };
-                update("careerHighlights", updated);
+                updateListItem("careerHighlights", updated);
               }}
-              placeholder="Heading"
-              style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 13, fontWeight: 600, marginBottom: 6, boxSizing: "border-box" }}
+              style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 13, fontWeight: 600, marginBottom: 8, boxSizing: "border-box" }}
             />
             <textarea
               value={h.bullet}
               onChange={(e) => {
                 const updated = [...highlights];
                 updated[i] = { ...updated[i], bullet: e.target.value };
-                update("careerHighlights", updated);
+                updateListItem("careerHighlights", updated);
               }}
               rows={3}
               style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 13, resize: "vertical", boxSizing: "border-box" }}
@@ -426,12 +549,27 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange }: {
         ))}
       </div>
 
-      {/* Download button placeholder */}
+      {/* Gate 2 violations */}
+      {gate2Errors && (
+        <div style={{ marginBottom: 16, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 16 }}>
+          <p style={{ fontWeight: 700, color: "#b91c1c", marginBottom: 8 }}>Cannot download — please fix these issues:</p>
+          {gate2Errors.map((v: any, i: number) => (
+            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+              <span style={{ background: "#dc2626", color: "white", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 4 }}>
+                {v.rule}
+              </span>
+              <span style={{ fontSize: 13, color: "#b91c1c" }}>{v.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <button
-        onClick={() => alert("Download not yet implemented")}
-        style={{ width: "100%", background: "#1B2A4A", color: "white", fontWeight: 600, fontSize: 14, padding: "12px 0", borderRadius: 8, border: "none", cursor: "pointer" }}
+        onClick={handleDownload}
+        disabled={downloading}
+        style={{ width: "100%", background: downloading ? "#6b7280" : "#1B2A4A", color: "white", fontWeight: 600, fontSize: 14, padding: "12px 0", borderRadius: 8, border: "none", cursor: downloading ? "not-allowed" : "pointer" }}
       >
-        Confirm & Download
+        {downloading ? "Saving..." : "Confirm & Download"}
       </button>
     </div>
   );
