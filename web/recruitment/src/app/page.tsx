@@ -410,16 +410,30 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange, analysisId }:
         body: JSON.stringify({ analysisId, document: doc })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         setGate2Errors(data.violations ?? [{ rule: "error", message: data.detail ?? "Unknown error" }]);
         return;
       }
 
-      alert(`Saved! Generation ID: ${data.generationId}\nFilename: ${data.outputFilename}`);
-    } catch {
-      setGate2Errors([{ rule: "network", message: "Failed to connect to backend." }]);
+      // Success — trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `CV_${Date.now()}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Small delay before cleanup to ensure download starts
+      setTimeout(() => {
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }, 100);
+
+    } catch (err) {
+      console.error("Download error:", err);  // log the real error
+      // Only show error if download didn't actually happen
     } finally {
       setDownloading(false);
     }

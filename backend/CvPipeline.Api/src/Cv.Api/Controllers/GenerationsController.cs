@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;
 using CvPipeline.Api.Cv.Domain;
+using CvPipeline.Api.Cv.Infrastructure.Documents;
 
 namespace CvPipeline.Api.Cv.Api.Controllers;
 
@@ -10,8 +11,13 @@ namespace CvPipeline.Api.Cv.Api.Controllers;
 public class GenerationsController : ControllerBase
 {
     private readonly CreateGenerationHandler _handler;
+    private readonly CvDocumentRenderer _renderer;
 
-    public GenerationsController(CreateGenerationHandler handler) => _handler = handler;
+     public GenerationsController(CreateGenerationHandler handler, CvDocumentRenderer renderer)
+    {
+        _handler = handler;
+        _renderer = renderer;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -20,7 +26,11 @@ public class GenerationsController : ControllerBase
     {
         var command = new CreateGenerationCommand(request.AnalysisId, request.Document);
         var result = await _handler.HandleAsync(command, ct);
-        return StatusCode(201, result);
+        byte[] docxBytes = _renderer.Render(request.Document);
+        return File(
+            docxBytes,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            result.OutputFilename);
     }
 }
 

@@ -31,6 +31,7 @@ builder.Services.AddScoped<NormaliseSelectionHandler>();
 builder.Services.AddScoped<TailorNarrativeHandler>();
 builder.Services.AddScoped<Gate2Validator>();
 builder.Services.AddScoped<CreateGenerationHandler>();
+builder.Services.AddScoped<CvDocumentRenderer>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
