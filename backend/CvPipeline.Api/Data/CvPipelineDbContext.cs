@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using CvPipeline.Api.Models;
 
 namespace CvPipeline.Api.Data;
@@ -94,5 +96,24 @@ public class CvPipelineDbContext : DbContext
             entity.HasIndex(e => e.Provenance, "generation_fields_provenance_idx");
             entity.HasIndex(e => e.RuleIds, "generation_fields_rule_idx").HasMethod("gin");
         });
+
+        // Npgsql has built-in JsonDocument <-> jsonb mapping; other providers
+        // (e.g. the InMemory provider used in tests) don't, so give them a
+        // JsonDocument <-> string converter instead.
+        if (!Database.IsNpgsql())
+        {
+            var jsonDocumentConverter = new ValueConverter<JsonDocument, string>(
+                v => v.RootElement.GetRawText(),
+                v => JsonDocument.Parse(v, default));
+            var nullableJsonDocumentConverter = new ValueConverter<JsonDocument?, string?>(
+                v => v == null ? null : v.RootElement.GetRawText(),
+                v => v == null ? null : JsonDocument.Parse(v, default));
+
+            modelBuilder.Entity<Analysis>().Property(e => e.FailureDetail).HasConversion(nullableJsonDocumentConverter);
+            modelBuilder.Entity<Analysis>().Property(e => e.Document).HasConversion(nullableJsonDocumentConverter);
+            modelBuilder.Entity<Analysis>().Property(e => e.Warnings).HasConversion(jsonDocumentConverter);
+            modelBuilder.Entity<Generation>().Property(e => e.Document).HasConversion(jsonDocumentConverter);
+            modelBuilder.Entity<GenerationField>().Property(e => e.SourceQuotes).HasConversion(jsonDocumentConverter);
+        }
     }
 }
