@@ -31,7 +31,7 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
 
         var form = new MultipartFormDataContent();
         form.Add(new StringContent(cvText), "cvFile", "Jordan_Reeve_Resume_ORIGINAL.txt");
-        form.Add(new StringContent(jdText), "jobRequirements");
+        form.Add(new StringContent(jdText), "jobDescriptionFile", "JD_Senior_Software_Engineer_Level_4.txt");
 
         var response = await _client.PostAsync("/api/analyses", form);
         var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
