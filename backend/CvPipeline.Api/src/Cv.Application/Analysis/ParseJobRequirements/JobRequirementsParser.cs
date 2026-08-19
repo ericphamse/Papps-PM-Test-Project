@@ -1,4 +1,3 @@
-// src/Cv.Application/Analysis/ParseJobRequirements/JobRequirementsParser.cs
 using System.Text.RegularExpressions;
 using CvPipeline.Api.Cv.Domain;
 

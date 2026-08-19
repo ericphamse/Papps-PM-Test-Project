@@ -1,4 +1,3 @@
-// src/Cv.Application/Analysis/ExtractCv/NormaliseSelectionHandler.cs
 using CvPipeline.Api.Cv.Domain;
 using CvPipeline.Api.Cv.Application.Normalisation;
 using CvPipeline.Api.Cv.Application.Analysis.ParseJobRequirements;
@@ -18,14 +17,11 @@ public class NormaliseSelectionHandler
         var availability = NormaliseScalar(selection.Availability, cvText, NormalisationRules.TryN2_Availability);
         var location = NormaliseScalar(selection.Location, cvText, NormalisationRules.TryN1_Location);
         var careerSynopsis = NormaliseCareerSynopsis(selection.CareerSynopsis, selection.Qualifications);
-        var referees = NormaliseReferees(selection.Referees, careerSynopsis.Value ?? new List<CareerEntry>());   // S5 needs careerSynopsis, so it's built first
+        var referees = NormaliseReferees(selection.Referees, careerSynopsis.Value ?? new List<CareerEntry>());
         var commendations = NormaliseCommendations(selection.CommendationsAndAwards);
         var qualificationsDetailed = NormaliseQualificationsDetailed(selection.QualificationsDetailed);
         var qualifications = BuildQualificationsSummary(qualificationsDetailed.Value ?? new List<QualificationEntry>());
 
-        // O6 result feeds stage 3's prompt later — not a CvDocument field itself.
-        // ApplyTechVotes verifies every rfqQuote against jobRequirements before
-        // honouring a "keep" (P3-style check) — a vote with no verified quote is a drop.
         var keptTechnologies = RelevanceFilter.ApplyTechVotes(selection.TechVotes, jobRequirements);
 
         var absent = new FieldValue<string>(null, Provenance.Absent, Array.Empty<string>());
@@ -40,17 +36,17 @@ public class NormaliseSelectionHandler
             FullName: fullName,
             Qualifications: qualifications,
             SecurityClearance: securityClearance,
-            YearsOfExperience: absent,           // stage 3 — not built yet
+            YearsOfExperience: absent,
             Availability: availability,
             Location: location,
             Referees: referees,
             CareerSynopsis: careerSynopsis,
-            ProfessionalProfile: absent,          // stage 3 — not built yet
-            RoleSuitability: absent,              // stage 3 — not built yet
-            CoreCompetencies: absentList,         // stage 3 — not built yet
+            ProfessionalProfile: absent,
+            RoleSuitability: absent,
+            CoreCompetencies: absentList,
             CommendationsAndAwards: commendations,
             QualificationsDetailed: qualificationsDetailed,
-            CareerHighlights: absentHighlights    // stage 3 — not built yet
+            CareerHighlights: absentHighlights
         );
         return new NormalisedResult(cvDocument, keptTechnologies);
     }
@@ -67,12 +63,11 @@ public class NormaliseSelectionHandler
         if (quotes.SourceQuotes.Length == 0)
             return new FieldValue<string>(null, Provenance.Absent, Array.Empty<string>());
 
-        string span = RelevanceFilter.StripCommercialAndOfferClauses(quotes.SourceQuotes[0]);                     // ← O5 / O8: strip commercial terms / offer asides that rode along in the same span
+        string span = RelevanceFilter.StripCommercialAndOfferClauses(quotes.SourceQuotes[0]);
         var result = rule(span);
         if (result is not null)
             return new FieldValue<string>(result.Value, Provenance.Normalised, quotes.SourceQuotes, new[] { result.RuleId, "O7" });
 
-        // P1: no rule matched — accept the raw span as verbatim if it's genuinely in the source
         return cvText.Contains(span, StringComparison.OrdinalIgnoreCase)
             ? new FieldValue<string>(span, Provenance.Verbatim, quotes.SourceQuotes)
             : new FieldValue<string>(span, Provenance.Absent, quotes.SourceQuotes);
@@ -111,24 +106,20 @@ public class NormaliseSelectionHandler
                 r.Phone.SourceQuotes.FirstOrDefault() ?? ""));
         }
 
-        // S5: exactly 2 referees, at least one a recent/current direct supervisor.
-        // TODO: DateTime.UtcNow.Year makes this one call impure — inject the "as of"
-        // year the same way you do for any other date-anchored rule, for the same
-        // determinism reason (Inv-3).
         var selected = NormalisationRules.SelectReferees(candidates, careerSynopsis, DateTime.UtcNow.Year);
 
         return new FieldValue<List<Referee>>(selected, Provenance.Normalised, Array.Empty<string>(), new[] { "N5", "S5" });
     }
 
     private FieldValue<List<CareerEntry>> NormaliseCareerSynopsis(
-    List<CareerEntryQuotes> entries, FieldQuotes qualificationsQuotes)   // ← new param
+    List<CareerEntryQuotes> entries, FieldQuotes qualificationsQuotes)
     {
         var results = new List<CareerEntry>();
         foreach (var e in entries)
         {
             if (e.Title.SourceQuotes.Length == 0) continue;
             string title = e.Title.SourceQuotes[0];
-            if (RelevanceFilter.IsUnrelatedRole(title)) continue; // O2
+            if (RelevanceFilter.IsUnrelatedRole(title)) continue;
 
             var n4 = NormalisationRules.TryN4_JobTitle(title);
             if (n4 is not null) title = n4.Value;
@@ -140,7 +131,6 @@ public class NormaliseSelectionHandler
                 n6Start?.Value ?? "", n6End?.Value ?? ""));
         }
 
-        // N10: add a career row for any full-time study period found
         foreach (var qualSpan in qualificationsQuotes.SourceQuotes)
         {
             var study = NormalisationRules.TryN10_StudyPeriod(qualSpan);
@@ -161,7 +151,7 @@ public class NormaliseSelectionHandler
             if (e.Qualification.SourceQuotes.Length == 0) continue;
             string qual = e.Qualification.SourceQuotes[0];
 
-            if (RelevanceFilter.IsPreTertiary(qual)) continue; // O3
+            if (RelevanceFilter.IsPreTertiary(qual)) continue;
 
             string? year = e.Year.SourceQuotes.FirstOrDefault();
             var n7 = NormalisationRules.TryN7_Certification(qual);
@@ -205,7 +195,7 @@ public class NormaliseSelectionHandler
 
         return new FieldValue<List<DatedEntry>>(
             results,
-            results.Count > 0 ? Provenance.Verbatim : Provenance.Absent,  // ← Verbatim, not Normalised
+            results.Count > 0 ? Provenance.Verbatim : Provenance.Absent,
             Array.Empty<string>());
     }
 }

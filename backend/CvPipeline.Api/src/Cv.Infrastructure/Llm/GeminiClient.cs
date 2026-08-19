@@ -1,4 +1,3 @@
-// src/Cv.Infrastructure/Llm/GeminiClient.cs
 using System.Text.Json;
 using Google.GenAI;
 using Google.GenAI.Types;

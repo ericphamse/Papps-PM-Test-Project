@@ -1,4 +1,3 @@
-// CvPipeline.Tests/PipelineSuiteTests.cs
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -13,7 +12,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
     private readonly HttpClient _client;
     private readonly PipelineTestFixture _factory;
 
-    // Fixture file paths
     private const string CvFixture = "fixtures/Jordan_Reeve_Resume_ORIGINAL.txt";
     private const string JdFixture = "fixtures/JD_Senior_Software_Engineer_Level_4.txt";
 
@@ -28,7 +26,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         var cvText = await File.ReadAllTextAsync(CvFixture);
         var jdText = await File.ReadAllTextAsync(JdFixture);
 
-        // Strip null bytes — same fix as in CreateAnalysisHandler
         cvText = cvText.Replace("\0", "");
         jdText = jdText.Replace("\0", "");
 
@@ -41,7 +38,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         return (response, json);
     }
 
-    // G1: returns 200
     [Fact]
     public async Task G1_PostAnalyses_Returns200()
     {
@@ -49,7 +45,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    // G2: analyses row persisted before Gemini call
     [Fact]
     public async Task G2_AnalysisRow_PersistedBeforeGeminiCall()
     {
@@ -65,7 +60,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.NotNull(row);
     }
 
-    // G3: roleTitle = "Senior Software Engineer"
     [Fact]
     public async Task G3_ParsedJd_RoleTitle_Correct()
     {
@@ -78,7 +72,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Equal("Senior Software Engineer", roleTitle);
     }
 
-    // G4: level = "Level 4"
     [Fact]
     public async Task G4_ParsedJd_Level_Correct()
     {
@@ -91,7 +84,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Equal("Level 4", level);
     }
 
-    // G5: fullName sourceQuotes contains "Jordan Reeve"
     [Fact]
     public async Task G5_Selection_FullName_ContainsJordanReeve()
     {
@@ -106,7 +98,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Contains("Jordan Reeve", quotes);
     }
 
-    // G6: location sourceQuotes contains "Adelaide SA 5000"
     [Fact]
     public async Task G6_Selection_Location_ContainsAdelaideSA5000()
     {
@@ -121,7 +112,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Contains("Adelaide SA 5000", quotes);
     }
 
-    // G7: careerSynopsis has 8 rows
     [Fact]
     public async Task G7_CareerSynopsis_Has8Rows()
     {
@@ -135,7 +125,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Equal(8, career.Count);
     }
 
-    // G8: bar attendant absent from careerSynopsis
     [Fact]
     public async Task G8_BarAttendant_AbsentFromCareerSynopsis()
     {
@@ -150,7 +139,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.DoesNotContain(titles, t => t != null && t.Contains("bar attendant"));
     }
 
-    // G9: Adelaide High School absent from qualificationsDetailed
     [Fact]
     public async Task G9_AdelaideHighSchool_AbsentFromQualifications()
     {
@@ -165,7 +153,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.DoesNotContain(quals, q => q != null && q.Contains("high school"));
     }
 
-    // G10: location.value = "Adelaide, SA" (N1 applied)
     [Fact]
     public async Task G10_Location_Value_NormalisedByN1()
     {
@@ -178,7 +165,6 @@ public class PipelineSuiteTests : IClassFixture<PipelineTestFixture>
         Assert.Equal("Adelaide, SA", location);
     }
 
-    // G11: every competency bullet cites at least one criterion
     [Fact]
     public async Task G11_CoreCompetencies_EachCitesAtLeastOneCriterion()
     {

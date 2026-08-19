@@ -1,4 +1,3 @@
-// src/Cv.Application/Validation/CvDocumentValidator.cs
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using CvPipeline.Api.Cv.Domain;
 
@@ -76,5 +75,4 @@ public class CvDocumentValidator
         }
     }
 
-    // ValidateDocument(CvDocument, ...) added later, once stage 3 assembles a real CvDocument
 }

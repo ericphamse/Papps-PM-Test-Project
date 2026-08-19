@@ -1,4 +1,3 @@
-// src/Cv.Api/Controllers/GenerationsController.cs
 using Microsoft.AspNetCore.Mvc;
 using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;
 using CvPipeline.Api.Cv.Domain;

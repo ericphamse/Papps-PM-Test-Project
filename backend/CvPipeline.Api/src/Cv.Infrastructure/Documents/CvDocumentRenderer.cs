@@ -1,4 +1,3 @@
-// src/Cv.Infrastructure/Documents/CvDocumentRenderer.cs
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -26,7 +25,6 @@ public class CvDocumentRenderer
         string roleTitle = doc.RoleTitle.Value ?? "";
         string level = doc.Level.Value ?? "";
 
-        // ← ADD THESE 3 LINES
         var headerPart = AddPageHeader(mainPart, fullName, roleTitle);
         var footerPart = AddPageFooter(mainPart);
         body.AppendChild(new SectionProperties(
@@ -34,47 +32,38 @@ public class CvDocumentRenderer
             new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) },
             new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) }));
 
-        // Title — UNCHANGED
         body.AppendChild(CreateParagraph($"{fullName} | {roleTitle} | {level}", bold: true, fontSize: 24, color: "1B2A4A"));
 
-        // Details table — UNCHANGED
         body.AppendChild(CreateDetailsTable(doc));
 
-        // Professional Profile — UNCHANGED
         body.AppendChild(CreateHeading("Professional Profile"));
         body.AppendChild(CreateParagraph(doc.ProfessionalProfile.Value ?? ""));
 
-        // Career Synopsis
         body.AppendChild(CreateHeading("Career Synopsis"));
         body.AppendChild(CreateTwoColumnTable(
             (doc.CareerSynopsis.Value ?? new())
                 .Select(e => ($"{e.Title} ({e.Organisation})", $"{e.StartYear} – {e.EndYear}"))
                 .ToList()));
                 
-        // Role Suitability — UNCHANGED
         body.AppendChild(CreateHeading("Role Suitability"));
         body.AppendChild(CreateParagraph(doc.RoleSuitability.Value ?? ""));
 
-        // Core Competencies — UNCHANGED
         body.AppendChild(CreateHeading("Core Competencies"));
         foreach (var c in doc.CoreCompetencies.Value ?? new())
             body.AppendChild(CreateBullet(c.Text));
 
-        // Commendations
         body.AppendChild(CreateHeading("Commendations and Awards"));
         body.AppendChild(CreateTwoColumnTable(
             (doc.CommendationsAndAwards.Value ?? new())
                 .Select(c => (c.Description, c.Year))
                 .ToList()));
 
-        // Qualifications
         body.AppendChild(CreateHeading("Qualifications"));
         body.AppendChild(CreateTwoColumnTable(
             (doc.QualificationsDetailed.Value ?? new())
                 .Select(q => ($"{q.Qualification}{(q.Institution != null ? $", {q.Institution}" : "")}", q.Year))
                 .ToList()));
 
-        // Career Highlights — UNCHANGED
         if (doc.CareerHighlights.Value?.Count > 0)
         {
             body.AppendChild(CreateHeading("Career Highlights"));
@@ -190,7 +179,6 @@ public class CvDocumentRenderer
 
         var row = new TableRow();
 
-        // Logo cell
         var logoCell = new TableCell();
         logoCell.AppendChild(new TableCellProperties(
             new Shading { Val = ShadingPatternValues.Clear, Fill = "FFFFFF" },
@@ -296,7 +284,6 @@ public class CvDocumentRenderer
         {
             var row = new TableRow();
 
-            // Left cell — title/description, 75% width
             var leftCell = new TableCell();
             leftCell.AppendChild(new TableCellProperties(
                 new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "3800" }));
@@ -307,7 +294,6 @@ public class CvDocumentRenderer
                 new Text(left))));
             row.AppendChild(leftCell);
 
-            // Right cell — year, right aligned, 25% width
             var rightCell = new TableCell();
             rightCell.AppendChild(new TableCellProperties(
                 new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "1200" }));

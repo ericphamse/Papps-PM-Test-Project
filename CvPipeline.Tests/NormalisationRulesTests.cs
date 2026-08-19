@@ -1,4 +1,3 @@
-// CvPipeline.Tests/NormalisationRulesTests.cs
 using CvPipeline.Api.Cv.Application.Normalisation;
 using Xunit;
 

@@ -1,4 +1,3 @@
-// src/Cv.Application/Generations/CreateGeneration/CreateGenerationHandler.cs
 using System.Text.Json;
 using CvPipeline.Api.Data;
 using CvPipeline.Api.Models;
@@ -29,12 +28,10 @@ public class CreateGenerationHandler
         CancellationToken ct)
     {   
         Console.WriteLine("=== CreateGenerationHandler called ===");
-        // Gate 2 — run all checks before persisting anything
         var violations = _validator.Validate(command.Document);
         if (violations.Count > 0)
             throw new Gate2Exception(violations);
 
-        // Persist generation row
         string filename = $"{command.Document.FullName.Value?.Replace(" ", "_") ?? "cv"}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.docx";
 
         var generation = new Generation
@@ -56,7 +53,6 @@ public class CreateGenerationHandler
 
         _db.Generations.Add(generation);
 
-        // Persist generation_fields — one row per field, recording final provenance
         var fields = BuildGenerationFields(generation.Id, command.Document);
         foreach (var field in fields)
         {
@@ -78,11 +74,9 @@ public class CreateGenerationHandler
             var provenance = field.Provenance.ToString().ToLowerInvariant();
             var ruleIds = field.RuleIds?.ToList();
             
-            // Satisfy the DB constraint: normalised must cite at least one rule
             if (provenance == "normalised" && (ruleIds == null || ruleIds.Count == 0))
-                ruleIds = new List<string> { "N1" }; // fallback — should not happen in practice
+                ruleIds = new List<string> { "N1" };
 
-            // Satisfy the DB constraint: absent must have empty source quotes
             var sourceQuotes = provenance == "absent" 
                 ? Array.Empty<string>() 
                 : field.SourceQuotes ?? Array.Empty<string>();

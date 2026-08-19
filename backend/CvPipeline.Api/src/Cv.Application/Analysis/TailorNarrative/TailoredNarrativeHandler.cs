@@ -1,4 +1,3 @@
-// src/Cv.Application/Analysis/TailorNarrative/TailorNarrativeHandler.cs
 using CvPipeline.Api.Cv.Application.Abstractions;
 using CvPipeline.Api.Cv.Application.Normalisation;
 using CvPipeline.Api.Cv.Domain;
@@ -38,37 +37,30 @@ public class TailorNarrativeHandler
     {
         var errors = new List<string>();
 
-        // P4: generated content must be grounded in verified CV spans
         if (!IsGroundedInCvText(fields.ProfessionalProfile, partial, cvText))
             errors.Add("professionalProfile: not grounded in verified CV spans");
 
         if (!IsGroundedInCvText(fields.RoleSuitability, partial, cvText))
             errors.Add("roleSuitability: not grounded in verified CV spans");
 
-        // J4: role suitability max 200 words
         int wordCount = fields.RoleSuitability.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
         if (wordCount > 200)
             errors.Add($"roleSuitability: {wordCount} words exceeds 200-word maximum (J4)");
 
-        // S3: exactly 10 competency bullets
         if (fields.CoreCompetencies.Count != 10)
             errors.Add($"coreCompetencies: expected 10 bullets, got {fields.CoreCompetencies.Count} (S3)");
 
-        // S3: each bullet cites at least one criterion
         for (int i = 0; i < fields.CoreCompetencies.Count; i++)
             if (fields.CoreCompetencies[i].Criteria.Length == 0)
                 errors.Add($"coreCompetencies[{i}]: no criteria cited (G11)");
 
-        // S4: exactly 6 highlights
         if (fields.CareerHighlights.Count != 6)
             errors.Add($"careerHighlights: expected 6 entries, got {fields.CareerHighlights.Count} (S4)");
 
-        // S4: each highlight cites at least one criterion
         for (int i = 0; i < fields.CareerHighlights.Count; i++)
             if (fields.CareerHighlights[i].Criteria.Length == 0)
                 errors.Add($"careerHighlights[{i}]: no criteria cited (G11)");
 
-        // V4: no first person anywhere
         var firstPersonWords = new[] { " I ", " I'", " I'd", " I've", " I'll", " I'm", "^I " };
         foreach (var word in firstPersonWords)
         {
@@ -83,18 +75,12 @@ public class TailorNarrativeHandler
 
     private bool IsGroundedInCvText(string generatedText, CvDocument partial, string cvText)
     {
-        // P4: generated content must be grounded in verified CV spans.
-        // We verify this by confirming the partial document has real, non-empty
-        // career/qualification data that was verified at Gate 1 — if stage 1
-        // passed Gate 1, those spans are real and the model was given them as context.
-        // A document with no career entries at all is the only genuinely ungrounded case.
         return partial.CareerSynopsis.Value is { Count: > 0 }
             || partial.Qualifications.Value is { Count: > 0 };
     }
 
     private CvDocument AssembleFinalDocument(CvDocument partial, TailoredFields tailored, string cvText)
     {
-        // O1 sweep — confirm no candidate contact details leaked into generated prose
         var refereePhones = partial.Referees.Value?.Select(r => r.Phone) ?? Enumerable.Empty<string>();
         var contactStrings = RelevanceFilter.ExtractCandidateContactStrings(cvText, refereePhones);
         var allGeneratedText = $"{tailored.ProfessionalProfile} {tailored.RoleSuitability} {tailored.YearsOfExperience}";

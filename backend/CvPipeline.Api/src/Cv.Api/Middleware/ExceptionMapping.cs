@@ -1,4 +1,3 @@
-// src/Cv.Api/Middleware/ExceptionMapping.cs
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
 using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;

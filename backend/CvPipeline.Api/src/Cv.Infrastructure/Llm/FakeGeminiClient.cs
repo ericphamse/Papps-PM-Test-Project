@@ -1,4 +1,3 @@
-// src/Cv.Infrastructure/Llm/FakeGeminiClient.cs
 using CvPipeline.Api.Cv.Application.Abstractions;
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
@@ -60,7 +59,7 @@ public class FakeGeminiClient : IGeminiClient
                     new FieldQuotes(new[] { "Won the Adelaide Dev Summit hackathon in 2019 with a team of three." }),  // ← exact CV text
                     new FieldQuotes(new[] { "2019" })),
                 new DatedEntryQuotes(
-                    new FieldQuotes(new[] { "Employee of the Year 2014" }),   // ← check exact CV text
+                    new FieldQuotes(new[] { "Employee of the Year 2014" }),
                     new FieldQuotes(new[] { "2014" }))
             },
             QualificationsDetailed: new List<QualificationEntryQuotes>

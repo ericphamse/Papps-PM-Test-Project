@@ -1,4 +1,3 @@
-// src/Cv.Application/Generations/CreateGeneration/Gate2Validator.cs
 using CvPipeline.Api.Cv.Application.Normalisation;
 using CvPipeline.Api.Cv.Application.Validation;
 using CvPipeline.Api.Cv.Domain;
@@ -9,20 +8,13 @@ public record Gate2Violation(string Rule, string Message);
 
 public class Gate2Validator
 {
-    // J2: referees must be present
-    // J4: roleSuitability max 200 words
-    // J5: 8 detail-table rows structurally present
-    // O1: no candidate contact details in generated prose
-
     public List<Gate2Violation> Validate(CvDocument document)
     {
         var violations = new List<Gate2Violation>();
 
-        // J2 — referees present
         if (document.Referees.Value is null || document.Referees.Value.Count == 0)
             violations.Add(new Gate2Violation("J2", "Referees must be present. At least one referee is required."));
 
-        // J4 — role suitability max 200 words
         if (document.RoleSuitability.Value is not null)
         {
             int wordCount = document.RoleSuitability.Value
@@ -32,9 +24,6 @@ public class Gate2Validator
                     $"Role suitability statement is {wordCount} words — maximum is 200."));
         }
 
-        // J5 — 8 detail-table rows structurally present
-        // These are guaranteed by the CvDocument type itself (non-nullable FieldValue<T> properties)
-        // but we still check they have non-null values
         var missingRows = new List<string>();
         if (document.FullName.Value is null) missingRows.Add("fullName");
         if (document.ProposedRole.Value is null) missingRows.Add("proposedRole");
@@ -49,8 +38,6 @@ public class Gate2Validator
             violations.Add(new Gate2Violation("J5",
                 $"Missing required detail-table rows: {string.Join(", ", missingRows)}."));
 
-        // O1 — no candidate contact details in generated prose
-        // We check professionalProfile and roleSuitability since those are the generated fields
         var generatedText = $"{document.ProfessionalProfile.Value} {document.RoleSuitability.Value}";
         var refereePhones = document.Referees.Value?
             .Select(r => r.Phone)
