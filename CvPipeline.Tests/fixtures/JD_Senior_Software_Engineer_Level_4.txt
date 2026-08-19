@@ -1,0 +1,76 @@
+REQUEST FOR QUOTE
+
+Software Engineering Services
+
+Reference: RFQ-2026-0148
+Client: Meridian Digital Services Pty Ltd (mock client)
+Engagement title: Senior Software Engineer
+Panel category: Software Engineering Services
+Level required: Level 4
+Location: Adelaide, SA (hybrid, minimum 2 days per week onsite)
+Engagement type: Initial 12 months, two 12-month extension options
+Start date: Within 6 weeks of contract award
+Quotes close: 5:00pm ACST, Friday 14 August 2026
+
+1. Background
+
+Meridian is consolidating three legacy customer-facing applications onto a single cloud-hosted platform. The program is mid-flight: the target architecture is agreed, the first two services are in production, and the remaining migration work runs through 2027. Meridian is seeking one Senior Software Engineer at Level 4 to work within an existing product team of eight.
+
+2. Scope of services
+
+The successful candidate will:
+- Design, build and maintain cloud-native services and customer-facing web applications.
+- Migrate functionality out of the legacy monolith into independently deployable services with no unplanned customer downtime.
+- Own services end to end, including data modelling, API design, deployment, monitoring and incident response.
+- Extend and maintain the shared component library used across product teams.
+- Improve the delivery pipeline (build, test, release automation, infrastructure as code).
+- Provide technical leadership: code review, technical design input, and mentoring of mid-level and junior engineers.
+- Communicate technical decisions and trade-offs to non-technical stakeholders, including product owners and the client's executive.
+
+3. Deliverables
+
+D1 Technical design documents for each assigned service - Per service, prior to build
+D2 Production-deployed services meeting agreed acceptance criteria - Per sprint
+D3 Automated test coverage and pipeline configuration for all delivered code - Per service
+D4 Runbooks and monitoring/alerting configuration for owned services - At service handover
+D5 Monthly delivery report and risk register input - Monthly
+
+4. Essential criteria
+
+E1 Minimum 10 years' professional software engineering experience, including at least 3 years at senior or lead level - 20%
+E2 Demonstrated delivery of production cloud-native services on AWS or Azure, including containerisation and orchestration - 25%
+E3 Strong full-stack capability across a modern JavaScript/TypeScript front end and at least one server-side language (Python, Go, Node.js, .NET or equivalent) - 20%
+E4 Demonstrated experience migrating legacy or monolithic systems to modern architectures without service disruption - 15%
+E5 Demonstrated technical leadership: code review, design authority, and mentoring of other engineers - 10%
+E6 Clear written and verbal communication with technical and non-technical audiences - 10%
+
+5. Desirable criteria
+
+- Relevant tertiary qualification in computer science, software engineering or a related discipline.
+- Current industry certification (e.g. AWS Solutions Architect, CKA, Scrum).
+- Experience with event-driven architectures and high-volume data pipelines.
+- Experience with infrastructure as code (Terraform or equivalent).
+- Experience working within a delivery team under a services panel or contracted arrangement.
+
+6. Mandatory conditions
+
+- Right to work: Must hold unrestricted Australian working rights.
+- Background check: Current National Police Check (or willingness to obtain prior to commencement).
+- Location: Must be able to attend the Adelaide office a minimum of 2 days per week.
+- Availability: Must be able to commence within 6 weeks of award.
+- Referees: Two referees required, at least one being a direct supervisor from an engagement within the last 3 years.
+
+7. Response requirements
+
+Respondents must submit, for each proposed candidate:
+- Candidate CV — using the client's supplied CV template. Maximum 2 pages. Must include full name, proposed role, qualifications, background check status, years of experience, availability, location and two referees.
+- Role suitability statement — maximum 200 words, addressing why the candidate meets Level 4 for this engagement, and explicitly referencing evidence against E1–E6.
+- Pricing — hourly rate, exclusive of GST.
+
+Candidate CVs that exceed 2 pages, omit referees, or do not use the supplied template will be marked non-conforming.
+
+8. Evaluation
+
+Responses will be evaluated on value for money: 70% weighting to the essential criteria at section 4, 30% weighting to price. Desirable criteria will be used to differentiate between candidates of otherwise equal merit.
+
+This is mock content generated for testing purposes. Meridian Digital Services Pty Ltd, the reference number and all dates are fictitious.
