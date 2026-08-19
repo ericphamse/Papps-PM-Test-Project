@@ -16,10 +16,10 @@ public class AnalysisController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(
         IFormFile cvFile,
-        [FromForm] string jobRequirements,
+        IFormFile jobDescriptionFile,
         CancellationToken ct)
     {
-        var result = await _handler.HandleAsync(cvFile, jobRequirements, ct);
+        var result = await _handler.HandleAsync(cvFile, jobDescriptionFile, ct);
         return Ok(result);
     }
 }

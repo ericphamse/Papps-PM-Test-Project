@@ -27,13 +27,14 @@ public class CreateAnalysisHandler
 
     public async Task<CreateAnalysisResult> HandleAsync(
         IFormFile cvFile,
-        string jobRequirementsText,
+        IFormFile jobDescriptionFile,
         CancellationToken ct)
     {
         //Extract cv text
         string cvText = await _extractor.ExtractTextAsync(cvFile, ct);
-        cvText = cvText.Replace("\0", "");   // ← add this line
-        jobRequirementsText = jobRequirementsText.Replace("\0", "");  // ← and this
+        cvText = cvText.Replace("\0", "");
+        string jobRequirementsText = await _extractor.ExtractTextAsync(jobDescriptionFile, ct);
+        jobRequirementsText = jobRequirementsText.Replace("\0", "");
         //Save to DB
         var analysis = new CvPipeline.Api.Models.Analysis
         {   
