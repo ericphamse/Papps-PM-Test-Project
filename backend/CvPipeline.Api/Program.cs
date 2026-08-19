@@ -11,6 +11,8 @@ using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddUserSecrets<Program>(optional: true);
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

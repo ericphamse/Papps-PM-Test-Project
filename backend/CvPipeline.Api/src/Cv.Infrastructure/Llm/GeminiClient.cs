@@ -17,8 +17,8 @@ public class GeminiClient : IGeminiClient
     {
         var apiKey = config["Gemini:ApiKey"]
             ?? throw new InvalidOperationException("Gemini:ApiKey is missing.");
-        _modelName = config["Gemini:Model"] ?? "gemini-2.5-flash";
-        _client = new Client(apiKey: apiKey);
+        _modelName = config["Gemini:Model"] ?? "gemini-3.6-flash";
+        _client = new Client(apiKey: apiKey, httpOptions: new HttpOptions { Timeout = 180000 });
     }
 
     public async Task<SelectionResult> SelectAsync(
@@ -37,7 +37,8 @@ public class GeminiClient : IGeminiClient
             {
                 SystemInstruction = new Content { Parts = new List<Part> { new Part { Text = systemInstruction } } },
                 ResponseMimeType = "application/json",
-                Temperature = 0.0f
+                Temperature = 0.0f,
+                HttpOptions = new HttpOptions { Timeout = 180000 }
             }
         );
 
@@ -146,7 +147,8 @@ public class GeminiClient : IGeminiClient
             {
                 SystemInstruction = new Content { Parts = new List<Part> { new Part { Text = systemInstruction } } },
                 ResponseMimeType = "application/json",
-                Temperature = 0.4f
+                Temperature = 0.4f,
+                HttpOptions = new HttpOptions { Timeout = 180000 }
             }
         );
 
