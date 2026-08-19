@@ -1,8 +1,14 @@
 // web/recruitment/src/features/analysis/getAnalysis.ts
 //
-// The one place that produces an Analysis. Sends the CV FILE and the job
-// requirements text to POST /api/analyses as multipart/form-data (Must 1:
-// .docx upload is the only input path — no PDF, no pasted CV text).
+// The one place that produces an Analysis. Sends BOTH inputs as files to
+// POST /api/analyses as multipart/form-data.
+//
+// Must 1: "Upload the candidate CV as a .docx ... Same thing for job
+// description, also .docx. There is no other input path: no PDF, no
+// paste-the-CV, no plain-text upload."
+// So the job description is a FILE, not pasted text. The server extracts the
+// text from both — extraction is a server-side concern (Must 1), and the same
+// CvTextExtractor handles both documents.
 //
 // USE_MOCK stays true until Eric confirms his field names + CORS. Flip it to
 // false for the integration session; nothing else in the UI has to change.
@@ -19,9 +25,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 // CONFIRM WITH ERIC: the exact multipart field names his endpoint binds to.
 // These two constants are the only thing that changes if his names differ.
 const CV_FILE_FIELD = "cvFile";
-const JOB_REQUIREMENTS_FIELD = "jobRequirements";
+const JD_FILE_FIELD = "jobDescriptionFile";
 
-export async function getAnalysis(cvFile: File, jobRequirements: string): Promise<Analysis> {
+export async function getAnalysis(cvFile: File, jdFile: File): Promise<Analysis> {
   if (USE_MOCK) {
     // Small delay so the loading states are actually visible while developing.
     await new Promise((r) => setTimeout(r, 400));
@@ -34,7 +40,7 @@ export async function getAnalysis(cvFile: File, jobRequirements: string): Promis
 
   const form = new FormData();
   form.append(CV_FILE_FIELD, cvFile);
-  form.append(JOB_REQUIREMENTS_FIELD, jobRequirements);
+  form.append(JD_FILE_FIELD, jdFile);
 
   const res = await fetch(`${API_BASE}/api/analyses`, {
     method: "POST",
