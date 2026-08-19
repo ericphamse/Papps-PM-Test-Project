@@ -49,18 +49,37 @@ export function DocumentEditor({ document, analysisId }: { document: CvDocument;
     setDoc((prev) => ({ ...prev, [key]: editField(prev[key], newValue) }));
   }
 
+  // The document keys whose value is a list of objects. Naming them explicitly
+  // (rather than accepting any keyof CvDocument) is what lets TypeScript check
+  // that `prop` is a real property of that row type — see ListRow below.
+  type ListKey =
+    | "referees"
+    | "careerSynopsis"
+    | "coreCompetencies"
+    | "commendationsAndAwards"
+    | "qualificationsDetailed"
+    | "careerHighlights";
+
+  // The row type for a given list key: Referee for "referees", Highlight for
+  // "careerHighlights", and so on. NonNullable strips the `| null` off value.
+  type ListRow<K extends ListKey> = NonNullable<CvDocument[K]["value"]>[number];
+
   // Update one property of one ROW inside a list field.
   // .map() returns a NEW array; length and order can never change, so 5.4 is
   // enforced by the shape of the code rather than by a check we could forget.
-  function updateListItem<K extends keyof CvDocument>(
+  //
+  // `prop` is constrained to the string-valued keys of that row type, so
+  // updateListItem("referees", 0, "titel", ...) is a compile error rather than
+  // a silently-added property.
+  function updateListItem<K extends ListKey, P extends keyof ListRow<K>>(
     key: K,
     rowIndex: number,
-    prop: string,
-    newValue: string,
+    prop: P,
+    newValue: ListRow<K>[P],
   ) {
     setDoc((prev) => {
-      const field = prev[key] as FieldValue<Record<string, unknown>[]>;
-      const rows = field.value ?? [];
+      const field = prev[key];
+      const rows = (field.value ?? []) as ListRow<K>[];
       const next = rows.map((row, i) => (i === rowIndex ? { ...row, [prop]: newValue } : row));
       return { ...prev, [key]: { ...field, value: next, provenance: "edited" } };
     });
