@@ -400,3 +400,46 @@ G15–G17 need a real API key and have no stable pass/fail, because the model ha
 
 \- \*\*Demo video:\*\* \_\[URL]\_
 
+
+
+# Inv-5 / T5: which suite the second RFQ belongs to
+
+> Paste this into the README. Should 13 says: *"Say which suite it belongs to... picking without
+> noticing there was a choice is the failure here."* This is that note.
+
+## The choice
+
+The brief offers two ways to use the second RFQ, and they prove different things:
+
+| | Suite | What it asserts | What it cannot tell you |
+|---|---|---|---|
+| **Fake both model responses** | Pipeline test, 10.1a | Our *code* routes two different inputs to two different outputs, and the difference survives normalisation, assembly and persistence | Nothing about whether the model actually tailors — we wrote both answers |
+| **Use a real API key** | Eval, 10.1b | The *model* genuinely responds to the job requirements | Has no stable pass/fail; the model has no stable output |
+
+## What we chose, and why
+
+**Both — but only the first goes in CI.**
+
+**T5 is a pipeline test (10.1a), with a faked `IGeminiClient`.** The fake returns two deliberately different responses for the two RFQs, and the test asserts all five `generated` fields differ materially between them. That proves the thing CI can actually prove: that `jobRequirements` reaches the tailoring stage, that two inputs produce two outputs, and that nothing downstream flattens the difference. It runs offline, deterministically, with no key — which is what Inv-12 requires and why `IGeminiClient` exists at all.
+
+**The real-key version is an eval (10.1b) and is deliberately NOT in CI.** Wiring it into CI buys a red build on a Tuesday because Gemini picked a different adjective, which tells us nothing and trains us to ignore the pipeline. It is run deliberately, by hand, and the result recorded below with a date.
+
+## Why this is the right split, not a dodge
+
+A faked T5 passing while the model ignores the RFQ entirely is a real failure mode, and the pipeline test cannot catch it. That is precisely why the eval exists and why we run it — but a check with no stable pass/fail does not belong in a gate that blocks merges. The distinction is between *tests* (deterministic, gate the build) and *evals* (probabilistic, inform a human).
+
+## The second RFQ
+
+`fixtures/JD_second_role.md` and `fixtures/JD_second_role.docx` — Senior Data Engineer, Kestrel Water Authority. Deliberately far from the Meridian software engineering RFQ:
+
+- Different discipline (data engineering, not full-stack software engineering)
+- Different essential criteria: E1 asks 8 years and 3 building production data pipelines, not 10 and 3 at senior level; E3 asks SQL and dimensional modelling, not a JavaScript front end; E5 asks data quality practice, not technical leadership
+- Different location (Brisbane), availability window (8 weeks, not 6), and extension structure
+
+If the same CV produces the same `coreCompetencies` against both, the tailoring is decorative and we would rather find that out now than in the demo.
+
+## Last eval run
+
+| Date | Result |
+|---|---|
+| _[DATE]_ | _[Record: did all five generated fields differ materially? Note anything that did not move.]_ |
