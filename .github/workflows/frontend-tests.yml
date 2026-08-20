@@ -1,0 +1,50 @@
+# .github/workflows/frontend-tests.yml
+#
+# Runs the frontend test suite on every push and pull request:
+#   - the docx conformance suite (C1–C11, brief 6.7)
+#   - the tokens guard (no hex literal outside tokens.ts, brief 6.0)
+#
+# Both run offline in Node — no browser, no server, no database, no API key.
+# That is only possible because features/docx/template.ts is pure: it takes a
+# CvDocument and returns a docx.Document, with no React and no fetch anywhere
+# in it.
+
+name: Frontend tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Jest (conformance + tokens)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web/recruitment
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/recruitment/package-lock.json
+
+      # `npm ci` (not `npm install`) — installs exactly what the lockfile
+      # pins, so CI cannot silently drift onto a different dependency version
+      # than the one the tests passed against locally.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # Type errors do not fail Jest, because next/jest strips types rather
+      # than checking them. This catches what the tests cannot.
+      - name: Type-check
+        run: npx tsc --noEmit
