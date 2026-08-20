@@ -1,6 +1,6 @@
 \# Contributions
 
-
+Both of us used AI assistants during development — Ryan on the frontend, Eric on parts of the backend. Some commits are attributed to a tool account as a result. All submitted code has been reviewed and can be explained by whoever owns that half.
 
 > The brief asks for who built what, who decided what, and where we disagreed.
 
