@@ -26,7 +26,7 @@ export default function Home() {
     formData.append("jobRequirements", jobRequirements);
 
     try {
-      const response = await fetch("http://localhost:5068/api/analyses", {
+      const response = await fetch("http://localhost:5000/api/analyses", {
         method: "POST",
         body: formData,
       });
@@ -404,7 +404,7 @@ function EditableDocumentView({ doc: initialDoc, onDocumentChange, analysisId }:
     setGate2Errors(null);
 
     try {
-      const response = await fetch("http://localhost:5068/api/generations", {
+      const response = await fetch("http://localhost:5000/api/generations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ analysisId, document: doc })
