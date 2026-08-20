@@ -180,4 +180,4 @@ POST /api/generations
 | ORM | EF Core + Npgsql |
 | AI | Google Gemini (Google AI Studio free tier) |
 | Word generation | DocumentFormat.OpenXml |
-| Tests | xUnit, WebApplicationFactory |
+| Tests | xUnit, Jest |
