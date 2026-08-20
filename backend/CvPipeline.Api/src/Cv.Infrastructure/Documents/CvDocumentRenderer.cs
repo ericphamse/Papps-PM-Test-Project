@@ -28,7 +28,7 @@ public class CvDocumentRenderer
         var headerPart = AddPageHeader(mainPart, fullName, roleTitle);
         var footerPart = AddPageFooter(mainPart);
         body.AppendChild(new SectionProperties(
-            new PageMargin { Top = 1440, Bottom = 1000, Left = 900, Right = 900 },
+            new PageMargin { Top = 720, Bottom = 720, Left = 720, Right = 720 },
             new HeaderReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(headerPart) },
             new FooterReference { Type = HeaderFooterValues.Default, Id = mainPart.GetIdOfPart(footerPart) }));
 
@@ -101,19 +101,25 @@ public class CvDocumentRenderer
             var row = new TableRow();
 
             // Label cell — navy background
-            var labelCell = new TableCell(new Paragraph(new Run(
+            var labelPara = new Paragraph(new Run(
                 new RunProperties(
                     new Bold(),
                     new Color { Val = "FFFFFF" },
                     new FontSize { Val = "18" }),
-                new Text(label))));
+                new Text(label)));
+            labelPara.ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "0" });
+            var labelCell = new TableCell(labelPara);
             labelCell.TableCellProperties = new TableCellProperties(
                 new Shading { Val = ShadingPatternValues.Clear, Color = "auto", Fill = "1B2A4A" },
                 new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "2000" });
             row.AppendChild(labelCell);
 
             // Value cell
-            var valueCell = new TableCell(new Paragraph(new Run(new Text(value))));
+            var valuePara = new Paragraph(new Run(
+                new RunProperties(new FontSize { Val = "20" }),
+                new Text(value)));
+            valuePara.ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "0" });
+            var valueCell = new TableCell(valuePara);
             valueCell.TableCellProperties = new TableCellProperties(
                 new Shading { Val = ShadingPatternValues.Clear, Color = "auto", Fill = "EEF1F7" });
             row.AppendChild(valueCell);
@@ -132,7 +138,10 @@ public class CvDocumentRenderer
         runProps.AppendChild(new FontSize { Val = fontSize.ToString() });
         runProps.AppendChild(new RunFonts { Ascii = "Calibri", HighAnsi = "Calibri" });
 
-        return new Paragraph(new Run(runProps, new Text(text)));
+        var paragraph = new Paragraph(new Run(runProps, new Text(text)));
+        paragraph.ParagraphProperties = new ParagraphProperties(
+            new SpacingBetweenLines { After = "60" });
+        return paragraph;
     }
 
     private static Paragraph CreateHeading(string text)
@@ -144,7 +153,7 @@ public class CvDocumentRenderer
 
         var para = new Paragraph(new Run(runProps, new Text(text)));
         para.ParagraphProperties = new ParagraphProperties(
-            new SpacingBetweenLines { Before = "240" });
+            new SpacingBetweenLines { Before = "120", After = "60" });
         return para;
     }
 
@@ -157,7 +166,7 @@ public class CvDocumentRenderer
             new Text("• " + text)));
         para.ParagraphProperties = new ParagraphProperties(
             new Indentation { Left = "360" },
-            new SpacingBetweenLines { After = "60" });
+            new SpacingBetweenLines { After = "20" });
         return para;
     }
 
@@ -287,11 +296,13 @@ public class CvDocumentRenderer
             var leftCell = new TableCell();
             leftCell.AppendChild(new TableCellProperties(
                 new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "3800" }));
-            leftCell.AppendChild(new Paragraph(new Run(
+            var leftPara = new Paragraph(new Run(
                 new RunProperties(
                     new RunFonts { Ascii = "Calibri", HighAnsi = "Calibri" },
                     new FontSize { Val = "20" }),
-                new Text(left))));
+                new Text(left)));
+            leftPara.ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "0" });
+            leftCell.AppendChild(leftPara);
             row.AppendChild(leftCell);
 
             var rightCell = new TableCell();
@@ -302,8 +313,9 @@ public class CvDocumentRenderer
                     new RunFonts { Ascii = "Calibri", HighAnsi = "Calibri" },
                     new FontSize { Val = "20" }),
                 new Text(right)));
-            rightPara.AppendChild(new ParagraphProperties(
-                new Justification { Val = JustificationValues.Right }));
+            rightPara.ParagraphProperties = new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = "0" });
             rightCell.AppendChild(rightPara);
             row.AppendChild(rightCell);
 

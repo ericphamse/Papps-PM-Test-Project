@@ -24,7 +24,7 @@ public class FakeGeminiClient : IGeminiClient
             }),
             SecurityClearance: new FieldQuotes(new[] { "Current National Police Check, did it last year for the Northline contract." }),
             YearsOfExperience: new FieldQuotes(new[] { "about 15 years now" }),
-            Availability: new FieldQuotes(new[] { "Would need roughly a month to wrap up properly." }),
+            Availability: new FieldQuotes(new[] { "Would need roughly 2 months to wrap up properly." }),
             Location: new FieldQuotes(new[] { "Adelaide SA 5000" }),
             Referees: new List<ReferQuotes>
             {
