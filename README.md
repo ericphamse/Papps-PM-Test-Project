@@ -150,7 +150,6 @@ POST /api/generations
 
 - **Generated content varies** between runs — AI output is non-deterministic. `FakeGeminiClient` provides deterministic output for CI.
 - **Word file layout** — closely matches the template but does not replicate the gradient header image.
-- **CV file format** — use `.txt` files. Real `.docx` parsing (OOXML) is not yet implemented.
 - **O2 (unrelated roles)** — uses a keyword list, not AI judgment. Extend `RelevanceFilter.cs` as needed.
 - **JD parsing** — assumes RFQ table format (`Engagement title`, `Level required`, `Panel category`). Free-text RFQs return `Absent` for those fields.
 - **Provenance is field-level** — one provenance tag per field, not per item within a list.
