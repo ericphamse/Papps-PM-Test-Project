@@ -1,4 +1,3 @@
-// src/Cv.Application/Analysis/TailorNarrative/TailoredFields.cs
 namespace CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
 
 public record TailoredCompetency(string Text, string[] Criteria);

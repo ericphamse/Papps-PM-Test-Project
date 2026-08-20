@@ -1,4 +1,3 @@
-// src/Cv.Infrastructure/Llm/FakeGeminiClient.cs
 using CvPipeline.Api.Cv.Application.Abstractions;
 using CvPipeline.Api.Cv.Application.Analysis.ExtractCv;
 using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
@@ -12,6 +11,7 @@ public class FakeGeminiClient : IGeminiClient
         string cvText, string jobRequirements,
         CancellationToken ct, List<string>? previousErrors = null)
     {
+        Console.WriteLine("=== FAKE GEMINI SelectAsync CALLED ===");
         var result = new SelectionResult(
             FullName: new FieldQuotes(new[] { "Jordan Reeve" }),
             Qualifications: new FieldQuotes(new[]
@@ -59,7 +59,7 @@ public class FakeGeminiClient : IGeminiClient
                     new FieldQuotes(new[] { "Won the Adelaide Dev Summit hackathon in 2019 with a team of three." }),  // ← exact CV text
                     new FieldQuotes(new[] { "2019" })),
                 new DatedEntryQuotes(
-                    new FieldQuotes(new[] { "Employee of the Year 2014" }),   // ← check exact CV text
+                    new FieldQuotes(new[] { "Employee of the Year 2014" }),
                     new FieldQuotes(new[] { "2014" }))
             },
             QualificationsDetailed: new List<QualificationEntryQuotes>
@@ -128,6 +128,7 @@ public class FakeGeminiClient : IGeminiClient
                 new("Legacy System Migration", "Migrated a 15-year-old .NET application to a containerised cloud-hosted service with no customer downtime and a 35% reduction in hosting cost.", new[] { "E4" })
             }
         );
+        Console.WriteLine($"=== FAKE returning {result.CoreCompetencies.Count} competencies ===");
         return Task.FromResult(result);
     }
 }

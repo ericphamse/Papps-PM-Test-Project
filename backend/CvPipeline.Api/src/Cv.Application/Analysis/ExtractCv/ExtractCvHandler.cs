@@ -1,4 +1,3 @@
-// src/Cv.Application/Analysis/ExtractCv/ExtractCvHandler.cs
 using CvPipeline.Api.Cv.Application.Abstractions;
 using CvPipeline.Api.Cv.Application.Validation;
 

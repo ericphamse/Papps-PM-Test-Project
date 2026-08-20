@@ -32,7 +32,8 @@ public class CreateAnalysisHandler
     {
         //Extract cv text
         string cvText = await _extractor.ExtractTextAsync(cvFile, ct);
-
+        cvText = cvText.Replace("\0", "");   // ← add this line
+        jobRequirementsText = jobRequirementsText.Replace("\0", "");  // ← and this
         //Save to DB
         var analysis = new CvPipeline.Api.Models.Analysis
         {   

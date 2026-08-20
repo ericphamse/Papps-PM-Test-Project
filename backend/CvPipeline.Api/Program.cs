@@ -7,8 +7,11 @@ using CvPipeline.Api.Cv.Infrastructure.Documents;
 using CvPipeline.Api.Cv.Application.Validation;
 using CvPipeline.Api.Cv.Api.Middleware;
 using CvPipeline.Api.Cv.Application.Analysis.TailorNarrative;
+using CvPipeline.Api.Cv.Application.Generations.CreateGeneration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -28,6 +31,9 @@ builder.Services.AddScoped<ExtractCvHandler>();
 builder.Services.AddScoped<CreateAnalysisHandler>();
 builder.Services.AddScoped<NormaliseSelectionHandler>();
 builder.Services.AddScoped<TailorNarrativeHandler>();
+builder.Services.AddScoped<Gate2Validator>();
+builder.Services.AddScoped<CreateGenerationHandler>();
+builder.Services.AddScoped<CvDocumentRenderer>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -35,6 +41,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
+
 
 var app = builder.Build();
 
